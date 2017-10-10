@@ -98,4 +98,32 @@ describe('Echo', () => {
             assert.strictEqual(completionsResponses[1].body[0].name, 'cd');
         });
     });
-})
+
+    it('should ignore placeholders in string', () => {
+        const server = createServer(__dirname);
+        openMockFile(server, mockFileName, 'test`abc${123}e${4}${5}fg`');
+        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 8, line: 1, prefix: '' } });
+        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 16, line: 1, prefix: '' } });
+        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 25, line: 1, prefix: '' } });
+        
+        return server.close().then(() => {
+            const responses = getResponsesOfType('completions', server);
+            assert.strictEqual(responses.length, 3);
+
+            assert.isTrue(responses[0].success);
+            assert.strictEqual(responses[0].body.length, 1);
+            assert.strictEqual(responses[0].body[0].name, 'ab');
+            assert.strictEqual(responses[0].body[0].kindModifiers, 'echo');
+
+            assert.isTrue(responses[1].success);
+            assert.strictEqual(responses[1].body.length, 1);
+            assert.strictEqual(responses[1].body[0].name, 'abcxxxxxxe');
+            assert.strictEqual(responses[1].body[0].kindModifiers, 'echo');
+
+            assert.isTrue(responses[2].success);
+            assert.strictEqual(responses[2].body.length, 1);
+            assert.strictEqual(responses[2].body[0].name, 'abcxxxxxxexxxxxxxxf');
+            assert.strictEqual(responses[2].body[0].kindModifiers, 'echo');
+        });
+    });
+});

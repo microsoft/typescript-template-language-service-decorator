@@ -10,12 +10,15 @@ const { createTemplateStringLanguageServiceProxy } = require('../../../../lib/in
  * @augments {TemplateStringLanguageService}
  */
 class TestStringLanguageService {
+constructor(log) {
+        this.log = log;
+    }
     /**
      * @param {string} body
      * @returns {ts.CompletionInfo}
      */
     getCompletionsAtPosition(body, position, context) {
-        let line= body.split(/\n/g)[position.line];
+        let line = body.split(/\n/g)[position.line];
         return {
             isGlobalCompletion: false,
             isMemberCompletion: false,
@@ -37,12 +40,16 @@ class TestStringLanguageService {
  * @returns {ts.LanguageService} 
  */
 function create(info) {
-    const adapter = new TestStringLanguageService();
-    info.project.projectService.logger.info('loaded plugin')
+    const log = (msg) => info.project.projectService.logger.info('!!!!! '+ msg);
+    const adapter = new TestStringLanguageService(log);
+    log('loaded plugin');
     return createTemplateStringLanguageServiceProxy(info.languageService, adapter, {
         tags: ['test'],
-        enableForStringWithSubstitutions: true
-    }, undefined);
+        enableForStringWithSubstitutions: true,
+        getSubstitution(text, start, end) {
+            return 'x'.repeat(end - start);
+        }
+    }, {log});
 }
 
 module.exports = (mod) => {
