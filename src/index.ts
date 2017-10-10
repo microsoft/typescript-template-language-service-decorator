@@ -17,7 +17,7 @@ export {
     TemplateContext
 };
 
-export function createTemplateStringLanguageServiceProxy(
+export function adaptTemplateLanguageService(
     languageService: LanguageService,
     templateStringService: TemplateLanguageService,
     settings: TemplateSettings,
