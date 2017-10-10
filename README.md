@@ -1,16 +1,72 @@
-# TypeScript Template Language Service Adapter
+# TypeScript Template Language Service Decorator
 
 Framework for decorating a TypeScript language service with additional support for languages embedded inside of template strings.
+
+## Usage
+This framework helps you to extend TypeScript's editor support for languagess embedded inside of template strings. It hides most of the details of detailing with template strings so that you only have to worry about working with the template string contents themselves.
+
+Support for embedded template languages is implement using the `TemplateLanguageService` interface. Here's a simple `TemplateLanguageService` that adds completions that repeat the prior characters in a template string
+
+```ts
+import { TemplateLanguageService, TemplateContext } from 'typescript-template-language-service-decorator';
+
+class EchoTemplateLanguageService implements TemplateLanguageService {
+    getCompletionsAtPosition(
+        context: TemplateContext,
+        position: ts.LineAndCharacter
+    ): ts.CompletionInfo {
+        const line = context.text.split(/\n/g)[position.line];
+        return {
+            isGlobalCompletion: false,
+            isMemberCompletion: false,
+            isNewIdentifierLocation: false,
+            entries: [
+                {
+                    name: line.slice(0, position.character),
+                    kind: ts.ScriptElementKind.unknown,
+                    kindModifiers: 'echo',
+                    sortText: 'echo'
+                }
+            ]
+        };
+    }
+}
+```
+
+The `TemplateLanguageService` operates on the contents of template nodes. `context.text` for example returns the text content of the template string, and the `position` passed to `getCompletionsAtPosition` is relative to the template string body.
+
+The `decorateWithTemplateLanguageService` method takes a existing TypeScript language service and decorates it with a `TemplateLanguageService`. Here's how you would use this mehod to create a simple TypeScript server plugin for the `EchoTemplateLanguageService`
+
+```ts
+import * as ts from 'typescript/lib/tsserverlibrary';
+import { decorateWithTemplateLanguageService } from 'typescript-template-language-service-decorator';
+
+function create(info: ts.server.PluginCreateInfo): ts.LanguageService {
+    return decorateWithTemplateLanguageService(
+        info.languageService,
+        new EchoTemplateLanguageService(config),
+        { tags: ['echo'] });
+}
+
+export = (mod: { typescript: typeof ts }) => {
+    return { create };
+};
+```
+
+This plugin will now add echo completions to all template strings tagged with `echo`.
+
+For a more advanced example of using this library, see the [typescript-styled-plugin](https://github.com/Microsoft/typescript-styled-plugin).
+
 
 ## Contributing
 
 To build, you'll need [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/).
 
-First, [fork](https://help.github.com/articles/fork-a-repo/) the typescript-template-string-language-service-adapter repo and clone your fork:
+First, [fork](https://help.github.com/articles/fork-a-repo/) the typescript-template-language-service-decorator repo and clone your fork:
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_ACCOUNT_NAME/typescript-template-string-language-service-adapter.git
-cd typescript-template-string-language-service-adapter
+git clone https://github.com/YOUR_GITHUB_ACCOUNT_NAME/typescript-template-language-service-decorator.git
+cd typescript-template-language-service-decorator
 ```
 
 Then install dev dependencies:
@@ -45,7 +101,7 @@ git push origin my-awesome-new-feature-branch
 ```
 
 Then [submit a pull request](https://help.github.com/articles/creating-a-pull-request/
-) against the Microsoft typescript-template-string-language-service-adapterrepository.
+) against the Microsoft typescript-template-language-service-decoratorrepository.
 
 Please also see our [Code of Conduct](CODE_OF_CONDUCT.md).
 
