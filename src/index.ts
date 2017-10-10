@@ -6,7 +6,7 @@ import Logger from './logger';
 import StandardScriptSourceHelper from './standard-script-source-helper';
 import TemplateLanguageService from './template-language-service';
 import TemplateSettings from './template-settings';
-import TemplateLanguageServiceDecorator from './template-language-service-Decorator';
+import TemplateLanguageServiceDecorator from './template-language-service-decorator';
 import TemplateContext from './template-context';
 import StandardTemplateSourceHelper from './standard-template-source-helper';
 
