@@ -27,11 +27,11 @@ class TestStringLanguageService {
         let match;
         while(match = re.exec(body)) {
             diagnostics.push({
-                category: ts.DiagnosticCategory.Error,
+                category: ts.DiagnosticCategory.Warning,
                 code: 1010,
                 file: context.file,
                 length: 1,
-                start: 0,
+                start: match.index,
                 source: 'e-error',
                 messageText: 'e is error'
             })
