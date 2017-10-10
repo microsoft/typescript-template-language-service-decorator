@@ -6,31 +6,14 @@
 import * as ts from 'typescript/lib/tsserverlibrary';
 import { isTagged, isTaggedLiteral } from './nodes';
 import Logger from './logger';
-
-export interface ScriptSourceHelper {
-    getAllNodes: (fileName: string, condition: (n: ts.Node) => boolean) => ts.Node[];
-    getNode: (fileName: string, position: number) => ts.Node | undefined;
-    getLineAndChar: (fileName: string, position: number) => ts.LineAndCharacter;
-    getOffset(fileName: string, line: number, character: number): number;
-}
+import ScriptSourceHelper from './script-source-helper';
+import StandardScriptSourceHelper from './standard-script-source-helper';
+import TemplateStringLanguageService from './template-string-language-service';
+import TemplateStringSettings from './template-string-settings';
+import TemplateContext from './template-context';
 
 type LanguageServiceMethodWrapper<K extends keyof ts.LanguageService>
     = (delegate: ts.LanguageService[K], info?: ts.server.PluginCreateInfo) => ts.LanguageService[K];
-
-export interface TemplateContext {
-    fileName: string;
-    node: ts.Node;
-
-    /**
-     * Map a location from within the template string to an offset within the template string
-     */
-    toOffset(location: ts.LineAndCharacter): number;
-
-    /**
-     * Map an offset within the template string to a location within the template string
-     */
-    toPosition(offset: number): ts.LineAndCharacter;
-}
 
 class StandardTemplateContext implements TemplateContext {
     constructor(
@@ -67,38 +50,7 @@ function relative(from: ts.LineAndCharacter, to: ts.LineAndCharacter): ts.LineAn
     };
 }
 
-export interface TemplateStringLanguageService {
-    getCompletionsAtPosition?(
-        body: string,
-        position: ts.LineAndCharacter,
-        context: TemplateContext
-    ): ts.CompletionInfo;
-
-    getQuickInfoAtPosition?(
-        body: string,
-        position: ts.LineAndCharacter,
-        context: TemplateContext
-    ): ts.QuickInfo | undefined;
-
-    getSyntacticDiagnostics?(
-        body: string,
-        context: TemplateContext
-    ): ts.Diagnostic[];
-
-    getSemanticDiagnostics?(
-        body: string,
-        context: TemplateContext
-    ): ts.Diagnostic[];
-}
-
-export interface TemplateStringSettings {
-    readonly tags: string[];
-    readonly enableForStringWithSubstitutions?: boolean;
-
-    getSubstitution?(templateString: string, start: number, end: number): string;
-}
-
-class TemplateLanguageServiceProxyBuilder {
+export default class TemplateLanguageServiceProxy {
 
     private _wrappers: any[] = [];
 
@@ -311,15 +263,4 @@ class TemplateLanguageServiceProxyBuilder {
         }
         return 'x'.repeat(end - start);
     }
-}
-
-export function createTemplateStringLanguageServiceProxy(
-    languageService: ts.LanguageService,
-    helper: ScriptSourceHelper,
-    templateStringService: TemplateStringLanguageService,
-    logger: Logger,
-    settings: TemplateStringSettings
-): ts.LanguageService {
-    return new TemplateLanguageServiceProxyBuilder(helper, templateStringService, logger, settings)
-        .build(languageService);
 }

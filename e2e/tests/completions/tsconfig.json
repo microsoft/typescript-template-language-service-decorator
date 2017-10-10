@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+      "lib": [ ],
+      "plugins": [
+        { "name": "../../../tests/completions/echo-plugin" }
+      ]
+    }
+  }
+  
