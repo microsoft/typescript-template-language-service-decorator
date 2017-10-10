@@ -46,7 +46,7 @@ import { decorateWithTemplateLanguageService } from 'typescript-template-languag
 function create(info: ts.server.PluginCreateInfo): ts.LanguageService {
     return decorateWithTemplateLanguageService(
         info.languageService,
-        new EchoTemplateLanguageService(config),
+        new EchoTemplateLanguageService(),
         { tags: ['echo'] });
 }
 
