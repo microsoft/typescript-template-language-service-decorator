@@ -1,6 +1,6 @@
 //@ts-check
 const assert = require('chai').assert;
-const createServer = require('../../server-fixture');
+const createServer = require('../../_server');
 const { openMockFile, getFirstResponseOfType, getResponsesOfType } = require('../../_helpers');
 
 const mockFileName = 'main.ts';

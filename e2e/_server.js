@@ -6,7 +6,7 @@ const readline = require('readline');
 class TSServer {
     constructor(project) {
         const logfile = path.join(__dirname, 'log.txt');
-        const tsserverPath = path.join(__dirname, '..', 'node_modules', 'typescript', 'lib', 'tsserver');
+        const tsserverPath = path.join(__dirname, 'node_modules', 'typescript', 'lib', 'tsserver');
         const server = fork(tsserverPath, [
             '--logVerbosity', 'verbose',
             '--logFile', logfile
