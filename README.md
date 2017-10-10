@@ -101,7 +101,7 @@ git push origin my-awesome-new-feature-branch
 ```
 
 Then [submit a pull request](https://help.github.com/articles/creating-a-pull-request/
-) against the Microsoft typescript-template-language-service-decoratorrepository.
+) against the Microsoft typescript-template-language-service-decorator repository.
 
 Please also see our [Code of Conduct](CODE_OF_CONDUCT.md).
 
