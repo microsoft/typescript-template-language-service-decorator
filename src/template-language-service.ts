@@ -3,7 +3,7 @@ import TemplateContext from './template-context';
 /**
  * 
  */
-export default interface TemplateStringLanguageService {
+export default interface TemplateLanguageService {
     getCompletionsAtPosition?(
         context: TemplateContext,
         position: ts.LineAndCharacter

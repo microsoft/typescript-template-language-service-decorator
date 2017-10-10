@@ -6,14 +6,14 @@ import TemplateSourceHelper from './template-source-helper';
 import ScriptSourceHelper from './script-source-helper';
 import { isTaggedLiteral, isTagged, relative } from './nodes';
 import TemplateContext from './template-context';
-import TemplateStringSettings from './template-string-settings';
+import TemplateSettings from './template-settings';
 
 class StandardTemplateContext implements TemplateContext {
     constructor(
         public readonly fileName: string,
         public readonly node: ts.TemplateLiteral,
         private readonly helper: ScriptSourceHelper,
-        private readonly templateStringSettings: TemplateStringSettings
+        private readonly templateStringSettings: TemplateSettings
     ) { }
 
     public toOffset(position: ts.LineAndCharacter): number {
@@ -66,7 +66,7 @@ class StandardTemplateContext implements TemplateContext {
 
 export default class StandardTemplateSourceHelper implements TemplateSourceHelper {
     constructor(
-        private readonly templateStringSettings: TemplateStringSettings,
+        private readonly templateStringSettings: TemplateSettings,
         private readonly helper: ScriptSourceHelper
     ) { }
 
@@ -128,7 +128,7 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
     }
 
     private getValidTemplateNode(
-        templateStringSettings: TemplateStringSettings,
+        templateStringSettings: TemplateSettings,
         node: ts.Node | undefined
     ): ts.TemplateLiteral | undefined {
         if (!node) {

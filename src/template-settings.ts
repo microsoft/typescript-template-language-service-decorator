@@ -4,7 +4,7 @@
 /**
  * Define which tagged templates to process and how to parse them.
  */
-export default interface TemplateStringSettings {
+export default interface TemplateSettings {
     /**
      * Set of tags that identify which tagged templates to process.
      * 

@@ -4,10 +4,8 @@
 // Original code forked from https://github.com/Quramy/ts-graphql-plugin
 
 import * as ts from 'typescript/lib/tsserverlibrary';
-import { relative } from './nodes';
 import Logger from './logger';
-import TemplateStringLanguageService from './template-string-language-service';
-import TemplateStringSettings from './template-string-settings';
+import TemplateStringLanguageService from './template-language-service';
 import TemplateContext from './template-context';
 import TemplateSourceHelper from './template-source-helper';
 
@@ -19,7 +17,7 @@ export default class TemplateLanguageServiceProxy {
     private _wrappers: any[] = [];
 
     constructor(
-        private readonly templateHelper: TemplateSourceHelper,
+        private readonly sourceHelper: TemplateSourceHelper,
         private readonly templateStringService: TemplateStringLanguageService,
         private readonly logger: Logger
     ) {
@@ -27,14 +25,14 @@ export default class TemplateLanguageServiceProxy {
             const call = templateStringService.getCompletionsAtPosition;
             this.wrap('getCompletionsAtPosition', delegate =>
                 (fileName: string, position: number) => {
-                    const context = this.templateHelper.getTemplate(fileName, position);
+                    const context = this.sourceHelper.getTemplate(fileName, position);
                     if (!context) {
                         return delegate(fileName, position);
                     }
 
                     return call.call(templateStringService,
                         context,
-                        this.templateHelper.getRelativePosition(context, position));
+                        this.sourceHelper.getRelativePosition(context, position));
                 });
         }
 
@@ -42,13 +40,13 @@ export default class TemplateLanguageServiceProxy {
             const call = templateStringService.getQuickInfoAtPosition;
             this.wrap('getQuickInfoAtPosition', delegate =>
                 (fileName: string, position: number): ts.QuickInfo => {
-                    const context = this.templateHelper.getTemplate(fileName, position);
+                    const context = this.sourceHelper.getTemplate(fileName, position);
                     if (!context) {
                         return delegate(fileName, position);
                     }
                     const quickInfo: ts.QuickInfo | undefined = call.call(templateStringService,
                         context,
-                        this.templateHelper.getRelativePosition(context, position));
+                        this.sourceHelper.getRelativePosition(context, position));
                     if (quickInfo) {
                         return Object.assign({}, quickInfo, {
                             textSpan: {
@@ -98,7 +96,7 @@ export default class TemplateLanguageServiceProxy {
     ) {
         const baseDiagnostics = delegate(fileName);
         const templateDiagnostics: ts.Diagnostic[] = [];
-        for (const context of this.templateHelper.getAllTemplates(fileName)) {
+        for (const context of this.sourceHelper.getAllTemplates(fileName)) {
             const diagnostics: ts.Diagnostic[] = implementation(context);
 
             for (const diagnostic of diagnostics) {
