@@ -8,6 +8,7 @@ import TemplateStringLanguageService from './template-string-language-service';
 import TemplateStringSettings from './template-string-settings';
 import TemplateLanguageServiceProxy from './template-language-service-proxy';
 import TemplateContext from './template-context';
+import StandardTemplateSourceHelper from './standard-template-source-helper';
 
 export {
     Logger,
@@ -22,8 +23,10 @@ export function createTemplateStringLanguageServiceProxy(
     settings: TemplateStringSettings,
     logger: Logger
 ): ts.LanguageService {
+    const helper = new StandardScriptSourceHelper(languageService);
     return new TemplateLanguageServiceProxy(
-        new StandardScriptSourceHelper(languageService),
+        helper,
+        new StandardTemplateSourceHelper(helper),
         templateStringService,
         logger,
         settings

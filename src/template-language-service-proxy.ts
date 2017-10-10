@@ -11,6 +11,7 @@ import StandardScriptSourceHelper from './standard-script-source-helper';
 import TemplateStringLanguageService from './template-string-language-service';
 import TemplateStringSettings from './template-string-settings';
 import TemplateContext from './template-context';
+import TemplateSourceHelper from './template-source-helper';
 
 type LanguageServiceMethodWrapper<K extends keyof ts.LanguageService>
     = (delegate: ts.LanguageService[K], info?: ts.server.PluginCreateInfo) => ts.LanguageService[K];
@@ -84,6 +85,7 @@ export default class TemplateLanguageServiceProxy {
 
     constructor(
         private readonly helper: ScriptSourceHelper,
+        private readonly templateHelper: TemplateSourceHelper,
         private readonly templateStringService: TemplateStringLanguageService,
         private readonly logger: Logger,
         private readonly templateStringSettings: TemplateStringSettings
@@ -92,7 +94,7 @@ export default class TemplateLanguageServiceProxy {
             const call = templateStringService.getCompletionsAtPosition;
             this.wrap('getCompletionsAtPosition', delegate =>
                 (fileName: string, position: number) => {
-                    const node = this.getTemplateNode(fileName, position);
+                    const node = this.templateHelper.getTemplateNode(templateStringSettings, fileName, position);
                     if (!node) {
                         return delegate(fileName, position);
                     }
@@ -107,7 +109,7 @@ export default class TemplateLanguageServiceProxy {
             const call = templateStringService.getQuickInfoAtPosition;
             this.wrap('getQuickInfoAtPosition', delegate =>
                 (fileName: string, position: number): ts.QuickInfo => {
-                    const node = this.getTemplateNode(fileName, position);
+                    const node = this.templateHelper.getTemplateNode(templateStringSettings, fileName, position);
                     if (!node) {
                         return delegate(fileName, position);
                     }
@@ -166,78 +168,6 @@ export default class TemplateLanguageServiceProxy {
         return relative(baseLC, cursorLC);
     }
 
-    private getTemplateNode(fileName: string, position: number): ts.TemplateLiteral | undefined {
-        const node = this.getValidTemplateNode(this.helper.getNode(fileName, position));
-        if (!node) {
-            return undefined;
-        }
-
-        // Make sure we are inside the template string
-        if (position <= node.pos) {
-            return undefined;
-        }
-
-        // Make sure we are not inside of a placeholder
-        if (node.kind === ts.SyntaxKind.TemplateExpression) {
-            let start = node.head.end;
-            for (const child of node.templateSpans.map(x => x.literal)) {
-                const nextStart = child.getStart();
-                if (position >= start && position <= nextStart) {
-                    return undefined;
-                }
-                start = child.getEnd();
-            }
-        }
-
-        return node;
-    }
-
-    private getAllValidTemplateNodes(fileName: string): ts.TemplateLiteral[] {
-        const out: ts.TemplateLiteral[] = [];
-        for (const node of this.helper.getAllNodes(fileName, n => this.getValidTemplateNode(n) !== undefined)) {
-            const validNode = this.getValidTemplateNode(node);
-            if (validNode) {
-                out.push(validNode);
-            }
-        }
-        return out;
-    }
-
-    private getValidTemplateNode(node: ts.Node | undefined): ts.TemplateLiteral | undefined {
-        if (!node) {
-            return undefined;
-        }
-        switch (node.kind) {
-            case ts.SyntaxKind.TaggedTemplateExpression:
-                if (isTagged(node as ts.TaggedTemplateExpression, this.templateStringSettings.tags)) {
-                    return (node as ts.TaggedTemplateExpression).template;
-                }
-                return undefined;
-
-            case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
-                if (isTaggedLiteral(node as ts.NoSubstitutionTemplateLiteral, this.templateStringSettings.tags)) {
-                    return node as ts.NoSubstitutionTemplateLiteral;
-                }
-                return undefined;
-
-            case ts.SyntaxKind.TemplateHead:
-                if (!this.templateStringSettings.enableForStringWithSubstitutions || !node.parent || !node.parent.parent) {
-                    return undefined;
-                }
-                return this.getValidTemplateNode(node.parent.parent);
-
-            case ts.SyntaxKind.TemplateMiddle:
-            case ts.SyntaxKind.TemplateTail:
-                if (!this.templateStringSettings.enableForStringWithSubstitutions || !node.parent || !node.parent.parent) {
-                    return undefined;
-                }
-                return this.getValidTemplateNode(node.parent.parent.parent);
-
-            default:
-                return undefined;
-        }
-    }
-
     private adapterDiagnosticsCall(
         delegate: (fileName: string) => ts.Diagnostic[],
         implementation: (context: TemplateContext) => ts.Diagnostic[],
@@ -245,7 +175,7 @@ export default class TemplateLanguageServiceProxy {
     ) {
         const baseDiagnostics = delegate(fileName);
         const templateDiagnostics: ts.Diagnostic[] = [];
-        for (const templateNode of this.getAllValidTemplateNodes(fileName)) {
+        for (const templateNode of this.templateHelper.getAllTemplateNodes(this.templateStringSettings, fileName)) {
             const diagnostics: ts.Diagnostic[] = implementation(
                 new StandardTemplateContext(fileName, templateNode, this.helper, this.templateStringSettings));
 
