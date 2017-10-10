@@ -20,6 +20,11 @@ export default interface TemplateContext {
     text: string;
 
     /**
+     * AST node.
+     */
+    node: ts.TemplateLiteral;
+
+    /**
      * Map a location from within the template string to an offset within the template string
      */
     toOffset(location: LineAndCharacter): number;

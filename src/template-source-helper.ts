@@ -2,16 +2,17 @@
 // Licensed under the MIT License.
 
 import TemplateStringSettings from './template-string-settings';
+import TemplateContext from './template-context';
 
 export default interface TemplateSourceHelper {
-    getTemplateNode(
+    getTemplate(
         templateStringSettings: TemplateStringSettings,
         fileName: string,
         position: number
-    ): ts.TemplateLiteral | undefined;
+    ): TemplateContext | undefined;
 
-    getAllTemplateNodes(
+    getAllTemplates(
         templateStringSettings: TemplateStringSettings,
         fileName: string
-    ): ts.TemplateLiteral[];
+    ): TemplateContext[];
 }

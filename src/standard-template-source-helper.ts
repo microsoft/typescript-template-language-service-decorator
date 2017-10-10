@@ -5,18 +5,76 @@ import TemplateSourceHelper from './template-source-helper';
 import ScriptSourceHelper from './script-source-helper';
 import { TemplateStringSettings } from './index';
 import * as ts from 'typescript/lib/tsserverlibrary';
-import { isTaggedLiteral, isTagged } from './nodes';
+import { isTaggedLiteral, isTagged, relative } from './nodes';
+import TemplateContext from './template-context';
+
+
+class StandardTemplateContext implements TemplateContext {
+    constructor(
+        public readonly fileName: string,
+        public readonly node: ts.TemplateLiteral,
+        private readonly helper: ScriptSourceHelper,
+        private readonly templateStringSettings: TemplateStringSettings
+    ) { }
+
+    public toOffset(position: ts.LineAndCharacter): number {
+        const docOffset = this.helper.getOffset(this.fileName,
+            position.line + this.stringBodyPosition.line,
+            position.line === 0 ? this.stringBodyPosition.character + position.character : position.character);
+        return docOffset - this.stringBodyOffset;
+    }
+
+    public toPosition(offset: number): ts.LineAndCharacter {
+        const docPosition = this.helper.getLineAndChar(this.fileName, this.stringBodyOffset + offset);
+        return relative(this.stringBodyPosition, docPosition);
+    }
+
+    private get stringBodyOffset(): number {
+        return this.node.getStart() + 1;
+    }
+
+    private get stringBodyPosition(): ts.LineAndCharacter {
+        return this.helper.getLineAndChar(this.fileName, this.stringBodyOffset);
+    }
+
+    public get text(): string {
+        const literalContents = this.node.getText().slice(1, -1);
+        if (this.node.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
+            return literalContents;
+        }
+
+        const stringStart = this.node.getStart() + 1;
+        let contents = literalContents;
+        let nodeStart = this.node.head.end - stringStart - 2;
+        for (const child of this.node.templateSpans.map(x => x.literal)) {
+            const start = child.getStart() - stringStart + 1;
+            contents = contents.substr(0, nodeStart) + this.getSubstitution(literalContents, nodeStart, start) + contents.substr(start);
+            nodeStart = child.getEnd() - stringStart - 2;
+        }
+        return contents;
+    }
+
+    private getSubstitution(
+        templateString: string,
+        start: number,
+        end: number
+    ): string {
+        return this.templateStringSettings.getSubstitution
+            ? this.templateStringSettings.getSubstitution(templateString, start, end)
+            : 'x'.repeat(end - start);
+    }
+}
 
 export default class StandardTemplateSourceHelper implements TemplateSourceHelper {
     constructor(
         private readonly helper: ScriptSourceHelper
     ) { }
 
-    public getTemplateNode(
+    public getTemplate(
         templateStringSettings: TemplateStringSettings,
         fileName: string,
         position: number
-    ): ts.TemplateLiteral | undefined {
+    ): TemplateContext | undefined {
         const node = this.getValidTemplateNode(templateStringSettings, this.helper.getNode(fileName, position));
         if (!node) {
             return undefined;
@@ -39,18 +97,18 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
             }
         }
 
-        return node;
+        return new StandardTemplateContext(fileName, node, this.helper, templateStringSettings);
     }
 
-    public getAllTemplateNodes(
+    public getAllTemplates(
         templateStringSettings: TemplateStringSettings,
         fileName: string
-    ): ts.TemplateLiteral[] {
-        const out: ts.TemplateLiteral[] = [];
+    ): TemplateContext[] {
+        const out: TemplateContext[] = [];
         for (const node of this.helper.getAllNodes(fileName, n => this.getValidTemplateNode(templateStringSettings, n) !== undefined)) {
             const validNode = this.getValidTemplateNode(templateStringSettings, node);
             if (validNode) {
-                out.push(validNode);
+                out.push(new StandardTemplateContext(fileName, validNode, this.helper, templateStringSettings));
             }
         }
         return out;

@@ -5,6 +5,13 @@
 
 import * as ts from 'typescript/lib/tsserverlibrary';
 
+export function relative(from: ts.LineAndCharacter, to: ts.LineAndCharacter): ts.LineAndCharacter {
+    return {
+        line: to.line - from.line,
+        character: to.line === from.line ? to.character - from.character : to.character,
+    };
+}
+
 export function findNode(
     sourceFile: ts.SourceFile,
     position: number
