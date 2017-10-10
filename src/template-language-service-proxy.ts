@@ -21,59 +21,10 @@ export default class TemplateLanguageServiceProxy {
         private readonly templateStringService: TemplateStringLanguageService,
         private readonly logger: Logger
     ) {
-        if (templateStringService.getCompletionsAtPosition) {
-            const call = templateStringService.getCompletionsAtPosition;
-            this.wrap('getCompletionsAtPosition', delegate =>
-                (fileName: string, position: number) => {
-                    const context = this.sourceHelper.getTemplate(fileName, position);
-                    if (!context) {
-                        return delegate(fileName, position);
-                    }
-
-                    return call.call(templateStringService,
-                        context,
-                        this.sourceHelper.getRelativePosition(context, position));
-                });
-        }
-
-        if (templateStringService.getQuickInfoAtPosition) {
-            const call = templateStringService.getQuickInfoAtPosition;
-            this.wrap('getQuickInfoAtPosition', delegate =>
-                (fileName: string, position: number): ts.QuickInfo => {
-                    const context = this.sourceHelper.getTemplate(fileName, position);
-                    if (!context) {
-                        return delegate(fileName, position);
-                    }
-                    const quickInfo: ts.QuickInfo | undefined = call.call(templateStringService,
-                        context,
-                        this.sourceHelper.getRelativePosition(context, position));
-                    if (quickInfo) {
-                        return Object.assign({}, quickInfo, {
-                            textSpan: {
-                                start: quickInfo.textSpan.start + context.node.getStart() + 1,
-                                length: quickInfo.textSpan.length,
-                            },
-                        });
-                    }
-                    return delegate(fileName, position);
-                });
-        }
-
-        if (templateStringService.getSemanticDiagnostics) {
-            const call = templateStringService.getSemanticDiagnostics.bind(templateStringService);
-            this.wrap('getSemanticDiagnostics', delegate =>
-                (fileName: string) => {
-                    return this.adapterDiagnosticsCall(delegate, call, fileName);
-                });
-        }
-
-        if (templateStringService.getSyntacticDiagnostics) {
-            const call = templateStringService.getSyntacticDiagnostics.bind(templateStringService);
-            this.wrap('getSyntacticDiagnostics', delegate =>
-                (fileName: string) => {
-                    return this.adapterDiagnosticsCall(delegate, call, fileName);
-                });
-        }
+        this.tryAdaptGetCompletionsAtPosition();
+        this.tryAdaptGetQuickInfoAtPosition();
+        this.tryAdaptGetSemanticDiagnostics();
+        this.tryAdaptGetSyntaxDiagnostics();
     }
 
     public build(languageService: ts.LanguageService) {
@@ -82,6 +33,70 @@ export default class TemplateLanguageServiceProxy {
             ret[name] = wrapper((languageService as any)[name]);
         });
         return ret;
+    }
+
+    private tryAdaptGetSyntaxDiagnostics() {
+        if (!this.templateStringService.getSyntacticDiagnostics) {
+            return;
+        }
+
+        const call = this.templateStringService.getSyntacticDiagnostics.bind(this.templateStringService);
+        this.wrap('getSyntacticDiagnostics', delegate => (fileName: string) => {
+            return this.adapterDiagnosticsCall(delegate, call, fileName);
+        });
+    }
+
+    private tryAdaptGetSemanticDiagnostics() {
+        if (!this.templateStringService.getSemanticDiagnostics) {
+            return;
+        }
+
+        const call = this.templateStringService.getSemanticDiagnostics.bind(this.templateStringService);
+        this.wrap('getSemanticDiagnostics', delegate => (fileName: string) => {
+            return this.adapterDiagnosticsCall(delegate, call, fileName);
+        });
+    }
+
+    private tryAdaptGetQuickInfoAtPosition() {
+        if (!this.templateStringService.getQuickInfoAtPosition) {
+            return;
+        }
+
+        const call = this.templateStringService.getQuickInfoAtPosition;
+        this.wrap('getQuickInfoAtPosition', delegate => (fileName: string, position: number): ts.QuickInfo => {
+            const context = this.sourceHelper.getTemplate(fileName, position);
+            if (!context) {
+                return delegate(fileName, position);
+            }
+            const quickInfo: ts.QuickInfo | undefined = call.call(this.templateStringService, context, this.sourceHelper.getRelativePosition(context, position));
+            if (quickInfo) {
+                return Object.assign({}, quickInfo, {
+                    textSpan: {
+                        start: quickInfo.textSpan.start + context.node.getStart() + 1,
+                        length: quickInfo.textSpan.length,
+                    },
+                });
+            }
+            return delegate(fileName, position);
+        });
+    }
+
+    private tryAdaptGetCompletionsAtPosition() {
+        if (!this.templateStringService.getCompletionsAtPosition) {
+            return;
+        }
+
+        const call = this.templateStringService.getCompletionsAtPosition;
+        this.wrap('getCompletionsAtPosition', delegate => (fileName: string, position: number) => {
+            const context = this.sourceHelper.getTemplate(fileName, position);
+            if (!context) {
+                return delegate(fileName, position);
+            }
+
+            return call.call(this.templateStringService,
+                context,
+                this.sourceHelper.getRelativePosition(context, position));
+        });
     }
 
     private wrap<K extends keyof ts.LanguageService>(name: K, wrapper: LanguageServiceMethodWrapper<K>) {
