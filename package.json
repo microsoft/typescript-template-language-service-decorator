@@ -1,26 +1,22 @@
 {
-  "name": "typescript-styled-plugin",
-  "version": "0.1.0",
+  "name": "typescript-template-string-language-service-adapter",
+  "version": "0.0.1",
   "description": "TypeScript language service plugin that adds IntelliSense for styled components",
   "keywords": [
     "TypeScript",
-    "styled",
-    "styled-components",
-    "styled components",
-    "css"
+    "plugin"
   ],
   "main": "lib/index.js",
   "author": "Microsoft",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/typescript-styled-plugin.git"
+    "url": "https://github.com/Microsoft/typescript-template-string-language-service-adapter.git"
   },
   "bugs": {
-    "url": "https://github.com/Microsoft/typescript-styled-plugin/issues"
+    "url": "https://github.com/Microsoft/typescript-template-string-language-service-adapter/issues"
   },
   "dependencies": {
-    "vscode-css-languageservice": "^2.1.10",
     "vscode-languageserver-types": "^3.4.0"
   },
   "files": [
