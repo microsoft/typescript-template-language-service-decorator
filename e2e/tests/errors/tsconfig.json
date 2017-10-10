@@ -3,7 +3,7 @@
     "lib": [],
     "plugins": [
       {
-        "name": "../../../tests/completions/echo-plugin"
+        "name": "../../../tests/errors/eerror-plugin"
       }
     ]
   }

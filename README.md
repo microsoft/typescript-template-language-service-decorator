@@ -1,6 +1,6 @@
 # TypeScript Template String Language Service Adapter
 
-WIP
+WIP`
 
 ## Contributing
 
