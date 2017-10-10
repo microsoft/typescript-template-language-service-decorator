@@ -118,6 +118,15 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
         return out;
     }
 
+    public getRelativePosition(
+        context: TemplateContext,
+        offset: number
+    ): ts.LineAndCharacter {
+        const baseLC = this.helper.getLineAndChar(context.fileName, context.node.getStart() + 1);
+        const cursorLC = this.helper.getLineAndChar(context.fileName, offset);
+        return relative(baseLC, cursorLC);
+    }
+
     private getValidTemplateNode(
         templateStringSettings: TemplateStringSettings,
         node: ts.Node | undefined

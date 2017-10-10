@@ -13,4 +13,9 @@ export default interface TemplateSourceHelper {
     getAllTemplates(
         fileName: string
     ): TemplateContext[];
+
+    getRelativePosition(
+        context: TemplateContext,
+        offset: number
+    ): ts.LineAndCharacter;
 }

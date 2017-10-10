@@ -23,10 +23,10 @@ export function createTemplateStringLanguageServiceProxy(
     settings: TemplateStringSettings,
     logger: Logger
 ): ts.LanguageService {
-    const helper = new StandardScriptSourceHelper(languageService);
     return new TemplateLanguageServiceProxy(
-        helper,
-        new StandardTemplateSourceHelper(settings, helper),
+        new StandardTemplateSourceHelper(
+            settings,
+            new StandardScriptSourceHelper(languageService)),
         templateStringService,
         logger
     ).build(languageService);

@@ -6,7 +6,6 @@
 import * as ts from 'typescript/lib/tsserverlibrary';
 import { relative } from './nodes';
 import Logger from './logger';
-import ScriptSourceHelper from './script-source-helper';
 import TemplateStringLanguageService from './template-string-language-service';
 import TemplateStringSettings from './template-string-settings';
 import TemplateContext from './template-context';
@@ -20,7 +19,6 @@ export default class TemplateLanguageServiceProxy {
     private _wrappers: any[] = [];
 
     constructor(
-        private readonly helper: ScriptSourceHelper,
         private readonly templateHelper: TemplateSourceHelper,
         private readonly templateStringService: TemplateStringLanguageService,
         private readonly logger: Logger
@@ -36,7 +34,7 @@ export default class TemplateLanguageServiceProxy {
 
                     return call.call(templateStringService,
                         context,
-                        this.getRelativePositionWithinNode(fileName, context.node, position));
+                        this.templateHelper.getRelativePosition(context, position));
                 });
         }
 
@@ -50,7 +48,7 @@ export default class TemplateLanguageServiceProxy {
                     }
                     const quickInfo: ts.QuickInfo | undefined = call.call(templateStringService,
                         context,
-                        this.getRelativePositionWithinNode(fileName, context.node, position));
+                        this.templateHelper.getRelativePosition(context, position));
                     if (quickInfo) {
                         return Object.assign({}, quickInfo, {
                             textSpan: {
@@ -91,16 +89,6 @@ export default class TemplateLanguageServiceProxy {
     private wrap<K extends keyof ts.LanguageService>(name: K, wrapper: LanguageServiceMethodWrapper<K>) {
         this._wrappers.push({ name, wrapper });
         return this;
-    }
-
-    private getRelativePositionWithinNode(
-        fileName: string,
-        node: ts.Node,
-        offset: number
-    ): ts.LineAndCharacter {
-        const baseLC = this.helper.getLineAndChar(fileName, node.getStart() + 1);
-        const cursorLC = this.helper.getLineAndChar(fileName, offset);
-        return relative(baseLC, cursorLC);
     }
 
     private adapterDiagnosticsCall(
