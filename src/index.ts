@@ -6,7 +6,7 @@ import Logger from './logger';
 import StandardScriptSourceHelper from './standard-script-source-helper';
 import TemplateLanguageService from './template-language-service';
 import TemplateSettings from './template-settings';
-import TemplateLanguageServiceProxy from './template-language-service-proxy';
+import TemplateLanguageServiceDecorator from './template-language-service-Decorator';
 import TemplateContext from './template-context';
 import StandardTemplateSourceHelper from './standard-template-source-helper';
 
@@ -17,17 +17,34 @@ export {
     TemplateContext
 };
 
-export function adaptTemplateLanguageService(
+export interface AdditionalConfiguration {
+    logger?: Logger;
+}
+
+const nullLogger = new class NullLogger implements Logger {
+    public log(msg: string): void { }
+}();
+
+/**
+ * Augments a TypeScript language service with language support for the contents
+ * of template strings.
+ * 
+ * @param languageService Base language service to augment.
+ * @param templateService Language service for contents of template strings.
+ * @param templateSettings Determines how template strings are processed
+ * @param additionalConfig Additional configuration for the service
+ */
+export function decorateWithTemplateLanguageService(
     languageService: LanguageService,
-    templateStringService: TemplateLanguageService,
-    settings: TemplateSettings,
-    logger: Logger
+    templateService: TemplateLanguageService,
+    templateSettings: TemplateSettings,
+    additionalConfig?: AdditionalConfiguration
 ): ts.LanguageService {
-    return new TemplateLanguageServiceProxy(
+    return new TemplateLanguageServiceDecorator(
         new StandardTemplateSourceHelper(
-            settings,
+            templateSettings,
             new StandardScriptSourceHelper(languageService)),
-        templateStringService,
-        logger
-    ).build(languageService);
+        templateService,
+        (additionalConfig && additionalConfig.logger || nullLogger)
+    ).decorate(languageService);
 }

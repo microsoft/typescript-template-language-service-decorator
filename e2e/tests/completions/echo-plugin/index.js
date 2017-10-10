@@ -4,7 +4,7 @@
 // @ts-check
 const createPlugin = require('../../../_plugin');
 const ts = require('../../../../node_modules/typescript/lib/tsserverlibrary');
-const { adaptTemplateLanguageService } = require('../../../../lib/index');
+const { decorateWithTemplateLanguageService } = require('../../../../lib/index');
 
 /**
  * @augments {TemplateStringLanguageService}

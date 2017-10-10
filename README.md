@@ -1,6 +1,7 @@
-# TypeScript Template String Language Service Adapter
+# TypeScript Template Language Service Adapter
 
-WIP`
+Framework for 
+
 
 ## Contributing
 

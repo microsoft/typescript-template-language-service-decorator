@@ -15,7 +15,7 @@ module.exports = (createTemplateLanguageService, settings) => {
             const log = (msg) => info.project.projectService.logger.info('!!!!! ' + msg);
             const adapter = createTemplateLanguageService(log);
             log('loaded plugin');
-            return template.adaptTemplateLanguageService(
+            return template.decorateWithTemplateLanguageService(
                 info.languageService,
                 adapter,
                 settings,

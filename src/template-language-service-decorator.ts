@@ -27,7 +27,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetSyntaxDiagnostics();
     }
 
-    public build(languageService: ts.LanguageService) {
+    public decorate(languageService: ts.LanguageService) {
         const ret: any = languageService;
         this._wrappers.forEach(({ name, wrapper }) => {
             ret[name] = wrapper((languageService as any)[name]);
