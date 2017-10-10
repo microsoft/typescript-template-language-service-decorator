@@ -1,11 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import {Node, LineAndCharacter} from 'typescript/lib/tsserverlibrary';
+import { Node, LineAndCharacter } from 'typescript/lib/tsserverlibrary';
 
+/**
+ * 
+ */
 export default interface TemplateContext {
+    /**
+     * Name of the file the template is in.
+     */
     fileName: string;
-    node: Node;
+
+    /**
+     * Contents of the template.
+     * 
+     * Has substitutions already replaced.
+     */
+    text: string;
 
     /**
      * Map a location from within the template string to an offset within the template string

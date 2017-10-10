@@ -15,21 +15,18 @@ class TestStringLanguageService {
     }
 
     /**
-     * @param {string} body 
-     * @param {template.TemplateContext} context 
-     * 
      * @return {ts.Diagnostic[]}
      */
-    getSemanticDiagnostics(body, context) {
+    getSemanticDiagnostics({ text, fileName }) {
         /** @type {ts.Diagnostic[]} */
         const diagnostics = [];
         const re = /e/g
         let match;
-        while(match = re.exec(body)) {
+        while (match = re.exec(text)) {
             diagnostics.push({
                 category: ts.DiagnosticCategory.Warning,
                 code: 1010,
-                file: context.file,
+                file: fileName,
                 length: 1,
                 start: match.index,
                 source: 'e-error',

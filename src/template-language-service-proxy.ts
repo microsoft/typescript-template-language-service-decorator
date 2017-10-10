@@ -18,8 +18,9 @@ type LanguageServiceMethodWrapper<K extends keyof ts.LanguageService>
 class StandardTemplateContext implements TemplateContext {
     constructor(
         public readonly fileName: string,
-        public readonly node: ts.Node,
-        private readonly helper: ScriptSourceHelper
+        private readonly node: ts.TemplateLiteral,
+        private readonly helper: ScriptSourceHelper,
+        private readonly templateStringSettings: TemplateStringSettings
     ) { }
 
     public toOffset(position: ts.LineAndCharacter): number {
@@ -40,6 +41,33 @@ class StandardTemplateContext implements TemplateContext {
 
     private get stringBodyPosition(): ts.LineAndCharacter {
         return this.helper.getLineAndChar(this.fileName, this.stringBodyOffset);
+    }
+
+    public get text(): string {
+        const literalContents = this.node.getText().slice(1, -1);
+        if (this.node.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
+            return literalContents;
+        }
+
+        const stringStart = this.node.getStart() + 1;
+        let contents = literalContents;
+        let nodeStart = this.node.head.end - stringStart - 2;
+        for (const child of this.node.templateSpans.map(x => x.literal)) {
+            const start = child.getStart() - stringStart + 1;
+            contents = contents.substr(0, nodeStart) + this.getSubstitution(literalContents, nodeStart, start) + contents.substr(start);
+            nodeStart = child.getEnd() - stringStart - 2;
+        }
+        return contents;
+    }
+
+    private getSubstitution(
+        templateString: string,
+        start: number,
+        end: number
+    ): string {
+        return this.templateStringSettings.getSubstitution
+            ? this.templateStringSettings.getSubstitution(templateString, start, end)
+            : 'x'.repeat(end - start);
     }
 }
 
@@ -69,11 +97,9 @@ export default class TemplateLanguageServiceProxy {
                         return delegate(fileName, position);
                     }
 
-                    const contents = this.getContents(node);
                     return call.call(templateStringService,
-                        contents,
-                        this.getRelativePositionWithinNode(fileName, node, position),
-                        new StandardTemplateContext(fileName, node, this.helper));
+                        new StandardTemplateContext(fileName, node, this.helper, this.templateStringSettings),
+                        this.getRelativePositionWithinNode(fileName, node, position));
                 });
         }
 
@@ -85,11 +111,9 @@ export default class TemplateLanguageServiceProxy {
                     if (!node) {
                         return delegate(fileName, position);
                     }
-                    const contents = this.getContents(node);
                     const quickInfo: ts.QuickInfo | undefined = call.call(templateStringService,
-                        contents,
-                        this.getRelativePositionWithinNode(fileName, node, position),
-                        new StandardTemplateContext(fileName, node, this.helper));
+                        new StandardTemplateContext(fileName, node, this.helper, this.templateStringSettings),
+                        this.getRelativePositionWithinNode(fileName, node, position));
                     if (quickInfo) {
                         return Object.assign({}, quickInfo, {
                             textSpan: {
@@ -214,35 +238,16 @@ export default class TemplateLanguageServiceProxy {
         }
     }
 
-    private getContents(node: ts.TemplateLiteral): string {
-        const literalContents = node.getText().slice(1, -1);
-        if (node.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
-            return literalContents;
-        }
-
-        const stringStart = node.getStart() + 1;
-        let contents = literalContents;
-        let nodeStart = node.head.end - stringStart - 2;
-        for (const child of node.templateSpans.map(x => x.literal)) {
-            const start = child.getStart() - stringStart + 1;
-            contents = contents.substr(0, nodeStart) + this.getSubstitution(literalContents, nodeStart, start) + contents.substr(start);
-            nodeStart = child.getEnd() - stringStart - 2;
-        }
-        return contents;
-    }
-
     private adapterDiagnosticsCall(
         delegate: (fileName: string) => ts.Diagnostic[],
-        implementation: (body: string, context: TemplateContext) => ts.Diagnostic[],
+        implementation: (context: TemplateContext) => ts.Diagnostic[],
         fileName: string
     ) {
         const baseDiagnostics = delegate(fileName);
         const templateDiagnostics: ts.Diagnostic[] = [];
         for (const templateNode of this.getAllValidTemplateNodes(fileName)) {
-            const contents = this.getContents(templateNode);
             const diagnostics: ts.Diagnostic[] = implementation(
-                contents,
-                new StandardTemplateContext(fileName, templateNode, this.helper));
+                new StandardTemplateContext(fileName, templateNode, this.helper, this.templateStringSettings));
 
             for (const diagnostic of diagnostics) {
                 templateDiagnostics.push(Object.assign({}, diagnostic, {
@@ -251,16 +256,5 @@ export default class TemplateLanguageServiceProxy {
             }
         }
         return [...baseDiagnostics, ...templateDiagnostics];
-    }
-
-    private getSubstitution(
-        templateString: string,
-        start: number,
-        end: number
-    ): string {
-        if (this.templateStringSettings.getSubstitution) {
-            return this.templateStringSettings.getSubstitution(templateString, start, end);
-        }
-        return 'x'.repeat(end - start);
     }
 }

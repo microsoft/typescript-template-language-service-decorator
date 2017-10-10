@@ -26,5 +26,6 @@ export function createTemplateStringLanguageServiceProxy(
         new StandardScriptSourceHelper(languageService),
         templateStringService,
         logger,
-        settings).build(languageService);
+        settings
+    ).build(languageService);
 }

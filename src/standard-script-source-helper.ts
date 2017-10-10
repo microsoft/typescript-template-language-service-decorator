@@ -6,7 +6,6 @@ import { LanguageService, getLineAndCharacterOfPosition, getPositionOfLineAndCha
 import ScriptSourceHelper from './script-source-helper';
 import { findAllNodes, findNode } from './nodes';
 
-
 export default class StandardScriptSourceHelper implements ScriptSourceHelper {
     constructor(
         private readonly languageService: LanguageService
