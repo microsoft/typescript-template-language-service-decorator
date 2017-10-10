@@ -1,7 +1,6 @@
 # TypeScript Template Language Service Adapter
 
-Framework for 
-
+Framework for decorating a TypeScript language service with additional support for languages embedded inside of template strings.
 
 ## Contributing
 
