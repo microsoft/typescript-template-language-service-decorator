@@ -8,7 +8,7 @@ const { openMockFile, getFirstResponseOfType, getResponsesOfType } = require('..
 const mockFileName = 'main.ts';
 
 describe('Echo', () => {
-    it('should return completions inside string on single line', () => {
+    it('should return completions inside tagged, single line template', () => {
         const server = createServer(__dirname);
         openMockFile(server, mockFileName, 'const q = test`abcdefg`');
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 16, line: 1, prefix: '' } });
@@ -36,7 +36,7 @@ describe('Echo', () => {
         });
     });
 
-    it('should not return string completions before string', () => {
+    it('should not return completions before tagged template', () => {
         const server = createServer(__dirname);
         openMockFile(server, mockFileName, 'const q = test`abcdefg`');
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 1, line: 1, prefix: '' } });
@@ -52,11 +52,36 @@ describe('Echo', () => {
         });
     });
 
+    it('should return completions for template tag ending with tag name', () => {
+        const server = createServer(__dirname);
+        openMockFile(server, mockFileName, 'const q = this.is().a.test`abcdefg`');
+        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 30, line: 1, prefix: '' } });
+
+        return server.close().then(() => {
+            const response = getFirstResponseOfType('completions', server);
+            assert.isTrue(response.success);
+            assert.strictEqual(response.body.length, 1);
+            assert.strictEqual(response.body[0].name, 'ab');
+            assert.strictEqual(response.body[0].kindModifiers, 'echo');
+        });
+    });
+
+    it('should not return completions for non-tagged template', () => {
+        const server = createServer(__dirname);
+        openMockFile(server, mockFileName, 'const q = `abcdefg`');
+        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 12, line: 1, prefix: '' } });
+
+        return server.close().then(() => {
+            const response = getFirstResponseOfType('completions', server);
+            assert.isFalse(response.success);
+        });
+    });
+
     it('should return completions for multiline strings', () => {
         const server = createServer(__dirname);
         openMockFile(server, mockFileName, [
-            'const q = test`',
-            'abcdefg`'
+            'const q = test`abc',
+            'cdefg`'
         ].join('\n'));
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 1, line: 2, prefix: '' } });
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 3, line: 2, prefix: '' } });
@@ -70,7 +95,7 @@ describe('Echo', () => {
             assert.strictEqual(completionsResponses[0].body[0].name, '');
 
             assert.strictEqual(completionsResponses[1].body.length, 1);
-            assert.strictEqual(completionsResponses[1].body[0].name, 'ab');
+            assert.strictEqual(completionsResponses[1].body[0].name, 'cd');
         });
     });
 })
