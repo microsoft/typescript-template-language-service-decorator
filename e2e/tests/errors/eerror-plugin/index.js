@@ -2,18 +2,15 @@
 // Licensed under the MIT License.
 
 // @ts-check
-const ts = require('../../../../node_modules/typescript/lib/tsserverlibrary');
 
+const createPlugin = require('../../../_plugin');
+const ts = require('../../../../node_modules/typescript/lib/tsserverlibrary');
 const template = require('../../../../lib/index');
 
 /**
  * @extends {template.TemplateStringLanguageService}
  */
 class TestStringLanguageService {
-    constructor(log) {
-        this.log = log;
-    }
-
     /**
      * @return {ts.Diagnostic[]}
      */
@@ -37,23 +34,13 @@ class TestStringLanguageService {
     }
 }
 
-/**
- * @param {ts.server.PluginCreateInfo} info 
- * @returns {ts.LanguageService} 
- */
-function create(info) {
-    const log = (msg) => info.project.projectService.logger.info('!!!!! ' + msg);
-    const adapter = new TestStringLanguageService(log);
-    log('loaded plugin');
-    return template.createTemplateStringLanguageServiceProxy(info.languageService, adapter, {
+module.exports = createPlugin(
+    (_log) => {
+        return new TestStringLanguageService();
+    }, {
         tags: ['test'],
         enableForStringWithSubstitutions: true,
         getSubstitution(text, start, end) {
             return 'x'.repeat(end - start);
         }
-    }, { log });
-}
-
-module.exports = (mod) => {
-    return { create };
-};
+    });
