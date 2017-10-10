@@ -1,0 +1,45 @@
+{
+  "name": "typescript-styled-plugin",
+  "version": "0.1.0",
+  "description": "TypeScript language service plugin that adds IntelliSense for styled components",
+  "keywords": [
+    "TypeScript",
+    "styled",
+    "styled-components",
+    "styled components",
+    "css"
+  ],
+  "main": "lib/index.js",
+  "author": "Microsoft",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/typescript-styled-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/typescript-styled-plugin/issues"
+  },
+  "dependencies": {
+    "vscode-css-languageservice": "^2.1.10",
+    "vscode-languageserver-types": "^3.4.0"
+  },
+  "files": [
+    "lib"
+  ],
+  "devDependencies": {
+    "@types/node": "^7.0.22",
+    "chai": "^4.1.2",
+    "glob": "^7.1.2",
+    "mocha": "^3.5.3",
+    "tslint": "^5.3.2",
+    "typescript": "^2.5.3"
+  },
+  "peerDependencies": {
+    "typescript": "^2.3.0"
+  },
+  "scripts": {
+    "compile": "./node_modules/.bin/tsc -p .",
+    "watch:compile": "./node_modules/.bin/tsc --watch -p .",
+    "e2e": "./node_modules/.bin/mocha e2e/tests"
+  }
+}

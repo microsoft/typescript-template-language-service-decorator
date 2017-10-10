@@ -1,0 +1,18 @@
+language: node_js
+
+node_js:
+  - 'stable'
+
+sudo: false
+
+branches:
+  only:
+  - master
+
+install:
+  - npm install
+  - (cd e2e ; npm install)
+
+script:
+  - npm run compile
+  - npm run e2e
