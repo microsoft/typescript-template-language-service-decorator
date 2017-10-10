@@ -1,7 +1,7 @@
 {
-  "name": "typescript-template-string-language-service-adapter",
+  "name": "typescript-template-language-service-decorator",
   "version": "0.0.1",
-  "description": "TypeScript language service plugin that adds IntelliSense for styled components",
+  "description": "Frameowkr for decorating a TypeScript language service with support for languages embedded in template strings",
   "keywords": [
     "TypeScript",
     "plugin"
@@ -11,14 +11,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/typescript-template-string-language-service-adapter.git"
+    "url": "https://github.com/Microsoft/typescript-template-language-service-decorator.git"
   },
   "bugs": {
-    "url": "https://github.com/Microsoft/typescript-template-string-language-service-adapter/issues"
+    "url": "https://github.com/Microsoft/typescript-template-language-service-decorator/issues"
   },
-  "dependencies": {
-    "vscode-languageserver-types": "^3.4.0"
-  },
+  "dependencies": {},
   "files": [
     "lib"
   ],
