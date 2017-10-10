@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import * as ts from 'typescript/lib/tsserverlibrary';
 import TemplateSourceHelper from './template-source-helper';
 import ScriptSourceHelper from './script-source-helper';
-import { TemplateStringSettings } from './index';
-import * as ts from 'typescript/lib/tsserverlibrary';
 import { isTaggedLiteral, isTagged, relative } from './nodes';
 import TemplateContext from './template-context';
-
+import TemplateStringSettings from './template-string-settings';
 
 class StandardTemplateContext implements TemplateContext {
     constructor(
@@ -67,15 +66,17 @@ class StandardTemplateContext implements TemplateContext {
 
 export default class StandardTemplateSourceHelper implements TemplateSourceHelper {
     constructor(
+        private readonly templateStringSettings: TemplateStringSettings,
         private readonly helper: ScriptSourceHelper
     ) { }
 
     public getTemplate(
-        templateStringSettings: TemplateStringSettings,
         fileName: string,
         position: number
     ): TemplateContext | undefined {
-        const node = this.getValidTemplateNode(templateStringSettings, this.helper.getNode(fileName, position));
+        const node = this.getValidTemplateNode(
+            this.templateStringSettings,
+            this.helper.getNode(fileName, position));
         if (!node) {
             return undefined;
         }
@@ -97,18 +98,21 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
             }
         }
 
-        return new StandardTemplateContext(fileName, node, this.helper, templateStringSettings);
+        return new StandardTemplateContext(
+            fileName,
+            node,
+            this.helper,
+            this.templateStringSettings);
     }
 
     public getAllTemplates(
-        templateStringSettings: TemplateStringSettings,
         fileName: string
     ): TemplateContext[] {
         const out: TemplateContext[] = [];
-        for (const node of this.helper.getAllNodes(fileName, n => this.getValidTemplateNode(templateStringSettings, n) !== undefined)) {
-            const validNode = this.getValidTemplateNode(templateStringSettings, node);
+        for (const node of this.helper.getAllNodes(fileName, n => this.getValidTemplateNode(this.templateStringSettings, n) !== undefined)) {
+            const validNode = this.getValidTemplateNode(this.templateStringSettings, node);
             if (validNode) {
-                out.push(new StandardTemplateContext(fileName, validNode, this.helper, templateStringSettings));
+                out.push(new StandardTemplateContext(fileName, validNode, this.helper, this.templateStringSettings));
             }
         }
         return out;

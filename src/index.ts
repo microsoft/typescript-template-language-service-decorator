@@ -26,9 +26,8 @@ export function createTemplateStringLanguageServiceProxy(
     const helper = new StandardScriptSourceHelper(languageService);
     return new TemplateLanguageServiceProxy(
         helper,
-        new StandardTemplateSourceHelper(helper),
+        new StandardTemplateSourceHelper(settings, helper),
         templateStringService,
-        logger,
-        settings
+        logger
     ).build(languageService);
 }

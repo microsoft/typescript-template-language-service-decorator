@@ -6,13 +6,11 @@ import TemplateContext from './template-context';
 
 export default interface TemplateSourceHelper {
     getTemplate(
-        templateStringSettings: TemplateStringSettings,
         fileName: string,
         position: number
     ): TemplateContext | undefined;
 
     getAllTemplates(
-        templateStringSettings: TemplateStringSettings,
         fileName: string
     ): TemplateContext[];
 }
