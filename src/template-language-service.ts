@@ -1,7 +1,10 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 import TemplateContext from './template-context';
 
 /**
- * 
+ * Augments TypeScript with language support for a language embedded in a template string.
  */
 export default interface TemplateLanguageService {
     getCompletionsAtPosition?(
@@ -25,6 +28,7 @@ export default interface TemplateLanguageService {
     getFormattingEditsForRange?(
         context: TemplateContext,
         start: number,
-        end: number
+        end: number,
+        settings: ts.EditorSettings
     ): ts.TextChange[];
 }

@@ -115,14 +115,17 @@ export default class TemplateLanguageServiceProxy {
                     continue;
                 }
 
-                const templateFormattingEdits: ts.TextChange[] = call.call(this.templateStringService,
-                    template,
-                    Math.max(0, start - nodeStart),
-                    Math.min(nodeEnd - nodeStart, end - nodeStart));
-                templateEdits.push(
-                    ...templateFormattingEdits.map(change => this.translateTextChange(template, change)));
+                const templateStart = Math.max(0, start - nodeStart);
+                const templateEnd = Math.min(nodeEnd - nodeStart, end - nodeStart);
+                for (const change of call.call(this.templateStringService, template, templateStart, templateEnd, options)) {
+                    templateEdits.push(this.translateTextChange(template, change));
+                }
             }
-            return [...delegate(fileName, start, end, options), ...templateEdits];
+
+            return [
+                ...delegate(fileName, start, end, options),
+                ...templateEdits,
+            ];
         });
     }
 
