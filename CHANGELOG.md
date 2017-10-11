@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.1 - October 11, 2017
+- Ensure `getFormattingEditsForRange` also gets editorSettings.
+
 ## 0.1.0 - October 10, 2017
 - Added `getFormattingEditsForRange` to language service.
 
