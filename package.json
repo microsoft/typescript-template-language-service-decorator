@@ -1,9 +1,10 @@
 {
   "name": "typescript-template-language-service-decorator",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Framework for decorating a TypeScript language service with support for languages embedded in template strings",
   "keywords": [
     "TypeScript",
+    "typescript server",
     "plugin"
   ],
   "author": "Microsoft",

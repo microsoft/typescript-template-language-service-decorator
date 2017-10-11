@@ -7,7 +7,7 @@ const { openMockFile, getFirstResponseOfType, getResponsesOfType } = require('..
 
 const mockFileName = 'main.ts';
 
-describe('Echo', () => {
+describe('Completions', () => {
     it('should return completions inside tagged, single line template', () => {
         const server = createServer(__dirname);
         openMockFile(server, mockFileName, 'const q = test`abcdefg`');
