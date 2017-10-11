@@ -25,6 +25,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetQuickInfoAtPosition();
         this.tryAdaptGetSemanticDiagnostics();
         this.tryAdaptGetSyntaxDiagnostics();
+        this.tryAdaptGetFormattingEditsForRange();
     }
 
     public decorate(languageService: ts.LanguageService) {
@@ -99,6 +100,32 @@ export default class TemplateLanguageServiceProxy {
         });
     }
 
+    private tryAdaptGetFormattingEditsForRange() {
+        if (!this.templateStringService.getFormattingEditsForRange) {
+            return;
+        }
+
+        const call = this.templateStringService.getFormattingEditsForRange;
+        this.wrap('getFormattingEditsForRange', delegate => (fileName: string, start: number, end: number, options: ts.FormatCodeOptions | ts.FormatCodeSettings) => {
+            const templateEdits: ts.TextChange[] = [];
+            for (const template of this.sourceHelper.getAllTemplates(fileName)) {
+                const nodeStart = template.node.getStart() + 1;
+                const nodeEnd = template.node.getEnd() - 1;
+                if (end < nodeStart || start > nodeEnd) {
+                    continue;
+                }
+
+                const templateFormattingEdits: ts.TextChange[] = call.call(this.templateStringService,
+                    template,
+                    Math.max(0, start - nodeStart),
+                    Math.min(nodeEnd - nodeStart, end - nodeStart));
+                templateEdits.push(
+                    ...templateFormattingEdits.map(change => this.translateTextChange(template, change)));
+            }
+            return [...delegate(fileName, start, end, options), ...templateEdits];
+        });
+    }
+
     private wrap<K extends keyof ts.LanguageService>(name: K, wrapper: LanguageServiceMethodWrapper<K>) {
         this._wrappers.push({ name, wrapper });
         return this;
@@ -121,5 +148,13 @@ export default class TemplateLanguageServiceProxy {
             }
         }
         return [...baseDiagnostics, ...templateDiagnostics];
+    }
+
+    private translateTextChange(
+        context: TemplateContext,
+        textChangeInTemplate: ts.TextChange
+    ): ts.TextChange {
+        textChangeInTemplate.span.start += context.node.getStart() + 1;
+        return textChangeInTemplate;
     }
 }

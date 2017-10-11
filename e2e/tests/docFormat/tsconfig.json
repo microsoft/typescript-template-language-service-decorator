@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "lib": [],
+    "plugins": [
+      {
+        "name": "../../../tests/docFormat/split-plugin"
+      }
+    ]
+  }
+}

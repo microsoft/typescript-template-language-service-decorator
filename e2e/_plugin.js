@@ -19,7 +19,7 @@ module.exports = (createTemplateLanguageService, settings) => {
                 info.languageService,
                 adapter,
                 settings,
-                { log });
+                { logger: { log }  });
         }
     });
 }

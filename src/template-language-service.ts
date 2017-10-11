@@ -21,4 +21,10 @@ export default interface TemplateLanguageService {
     getSemanticDiagnostics?(
         context: TemplateContext
     ): ts.Diagnostic[];
+
+    getFormattingEditsForRange?(
+        context: TemplateContext,
+        start: number,
+        end: number
+    ): ts.TextChange[];
 }
