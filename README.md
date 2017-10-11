@@ -57,7 +57,12 @@ export = (mod: { typescript: typeof ts }) => {
 
 This plugin will now add echo completions to all template strings tagged with `echo`.
 
-For a more advanced example of using this library, see the [typescript-styled-plugin](https://github.com/Microsoft/typescript-styled-plugin).
+
+## Examples
+For more advanced examples of using this library:
+
+- [typescript-styled-plugin](https://github.com/Microsoft/typescript-styled-plugin)
+- [typescript-lit-html-plugin](https://github.com/mjbvz/typescript-lit-html-plugin)
 
 
 ## Contributing
