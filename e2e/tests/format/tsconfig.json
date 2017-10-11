@@ -3,7 +3,7 @@
     "lib": [],
     "plugins": [
       {
-        "name": "../../../tests/docFormat/split-plugin"
+        "name": "../../../tests/format/split-plugin"
       }
     ]
   }

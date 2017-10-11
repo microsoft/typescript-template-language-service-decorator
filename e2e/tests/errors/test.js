@@ -1,17 +1,12 @@
 //@ts-check
 const assert = require('chai').assert;
+const { assertRange } = require("../../_assert");
 const createServer = require('../../_server');
 const { openMockFile, getFirstResponseOfType, getResponsesOfType } = require('../../_helpers');
 
 const mockFileName = 'main.ts';
 
 
-function assertRange(range, startLine, startOffset, endLine, endOffset) {
-    assert.strictEqual(range.start.line, startLine);
-    assert.strictEqual(range.start.offset, startOffset);
-    assert.strictEqual(range.end.line, endLine);
-    assert.strictEqual(range.end.offset, endOffset);
-}
 
 describe('Errors', () => {
     it('should return errors for single line template string ', () => {
