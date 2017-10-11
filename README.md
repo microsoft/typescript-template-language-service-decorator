@@ -5,7 +5,7 @@ Framework for decorating a TypeScript language service with additional support f
 [![Build Status](https://travis-ci.org/Microsoft/typescript-template-language-service-decorator.svg?branch=master)](https://travis-ci.org/Microsoft/typescript-template-language-service-decorator)
 
 ## Usage
-This framework helps you to extend TypeScript's editor support for languagess embedded inside of template strings. It hides most of the details of detailing with template strings so that you only have to worry about working with the template string contents themselves.
+This framework helps you to extend TypeScript's editor support for languagess embedded inside of template strings. It hides most of the details of dealing with template strings so that you only have to worry about working with the template string contents themselves.
 
 Support for embedded template languages is implement using the `TemplateLanguageService` interface. Here's a simple `TemplateLanguageService` that adds completions that repeat the prior characters in a template string
 
