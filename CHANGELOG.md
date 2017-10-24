@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.2 - October 24, 2017
+- Compile to target es5 for VS support.
+
 ## 0.1.1 - October 11, 2017
 - Ensure `getFormattingEditsForRange` also gets editorSettings.
 
