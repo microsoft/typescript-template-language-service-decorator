@@ -52,10 +52,16 @@ export function isTaggedLiteral(node: ts.NoSubstitutionTemplateLiteral, tags: st
     return isTagged(tagNode, tags);
 }
 
+
+function escapeRegExp(string: string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export function isTagged(node: ts.TaggedTemplateExpression, tags: string[]): boolean {
     const text = node.tag.getText();
     return tags.some(tag =>
         text === tag
+        || new RegExp(`$${escapeRegExp(tag)}\s*^`).test(text)
         || text.startsWith(tag + '.')
         || text.endsWith('.' + tag)
         || text.startsWith(tag + '('));

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.3
+- Allow spaces after tag names
+
 ## 0.1.2 - October 24, 2017
 - Compile to target es5 for VS support.
 

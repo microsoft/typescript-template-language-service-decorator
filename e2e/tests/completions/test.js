@@ -105,7 +105,7 @@ describe('Completions', () => {
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 8, line: 1, prefix: '' } });
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 16, line: 1, prefix: '' } });
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 25, line: 1, prefix: '' } });
-        
+
         return server.close().then(() => {
             const responses = getResponsesOfType('completions', server);
             assert.strictEqual(responses.length, 3);
@@ -124,6 +124,20 @@ describe('Completions', () => {
             assert.strictEqual(responses[2].body.length, 1);
             assert.strictEqual(responses[2].body[0].name, 'abcxxxxxxexxxxxxxxf');
             assert.strictEqual(responses[2].body[0].kindModifiers, 'echo');
+        });
+    });
+
+    it('should allow tag to have space after it', () => {
+        const server = createServer(__dirname);
+        openMockFile(server, mockFileName, 'const q = test            `abcdefg`');
+        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 30, line: 1, prefix: '' } });
+
+        return server.close().then(() => {
+            const response = getFirstResponseOfType('completions', server);
+            assert.isTrue(response.success);
+            assert.strictEqual(response.body.length, 1);
+            assert.strictEqual(response.body[0].name, 'ab');
+            assert.strictEqual(response.body[0].kindModifiers, 'echo');
         });
     });
 });
