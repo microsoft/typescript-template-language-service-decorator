@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.0
+- Do not take runtime dependency on TypeScript.
+
 ## 0.1.3
 - Allow spaces after tag names
 

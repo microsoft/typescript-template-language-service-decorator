@@ -43,15 +43,16 @@ The `decorateWithTemplateLanguageService` method takes a existing TypeScript lan
 import * as ts from 'typescript/lib/tsserverlibrary';
 import { decorateWithTemplateLanguageService } from 'typescript-template-language-service-decorator';
 
-function create(info: ts.server.PluginCreateInfo): ts.LanguageService {
-    return decorateWithTemplateLanguageService(
-        info.languageService,
-        new EchoTemplateLanguageService(),
-        { tags: ['echo'] });
-}
-
 export = (mod: { typescript: typeof ts }) => {
-    return { create };
+    return {
+        create(info: ts.server.PluginCreateInfo): ts.LanguageService {
+            return decorateWithTemplateLanguageService(
+                mod.typescript,
+                info.languageService,
+                new EchoTemplateLanguageService(),
+                { tags: ['echo'] });
+        }
+    };
 };
 ```
 
