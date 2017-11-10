@@ -13,18 +13,20 @@ export function relative(from: ts.LineAndCharacter, to: ts.LineAndCharacter): ts
 }
 
 export function findNode(
+    typescript: typeof ts,
     sourceFile: ts.SourceFile,
     position: number
 ): ts.Node | undefined {
     function find(node: ts.Node): ts.Node | undefined {
         if (position >= node.getStart() && position < node.getEnd()) {
-            return ts.forEachChild(node, find) || node;
+            return typescript.forEachChild(node, find) || node;
         }
     }
     return find(sourceFile);
 }
 
 export function findAllNodes(
+    typescript: typeof ts,
     sourceFile: ts.SourceFile,
     cond: (n: ts.Node) => boolean
 ): ts.Node[] {
@@ -34,24 +36,27 @@ export function findAllNodes(
             result.push(node);
             return;
         } else {
-            ts.forEachChild(node, find);
+            typescript.forEachChild(node, find);
         }
     }
     find(sourceFile);
     return result;
 }
 
-export function isTaggedLiteral(node: ts.NoSubstitutionTemplateLiteral, tags: string[]): boolean {
+export function isTaggedLiteral(
+    typescript: typeof ts,
+    node: ts.NoSubstitutionTemplateLiteral,
+    tags: string[]
+): boolean {
     if (!node || !node.parent) {
         return false;
     }
-    if (node.parent.kind !== ts.SyntaxKind.TaggedTemplateExpression) {
+    if (node.parent.kind !== typescript.SyntaxKind.TaggedTemplateExpression) {
         return false;
     }
     const tagNode = node.parent as ts.TaggedTemplateExpression;
     return isTagged(tagNode, tags);
 }
-
 
 function escapeRegExp(string: string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

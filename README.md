@@ -25,7 +25,7 @@ class EchoTemplateLanguageService implements TemplateLanguageService {
             entries: [
                 {
                     name: line.slice(0, position.character),
-                    kind: ts.ScriptElementKind.unknown,
+                    kind: '',
                     kindModifiers: 'echo',
                     sortText: 'echo'
                 }

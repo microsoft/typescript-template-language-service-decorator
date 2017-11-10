@@ -10,9 +10,6 @@ const { decorateWithTemplateLanguageService } = require('../../../../lib/index')
  * @augments {TemplateStringLanguageService}
  */
 class TestStringLanguageService {
-    /**
-     * @returns {ts.CompletionInfo}
-     */
     getCompletionsAtPosition({ text }, position) {
         let line = text.split(/\n/g)[position.line];
         return {
@@ -22,7 +19,7 @@ class TestStringLanguageService {
             entries: [
                 {
                     name: line.slice(0, position.character),
-                    kind: ts.ScriptElementKind.unknown,
+                    kind: '',
                     kindModifiers: 'echo',
                     sortText: 'echo'
                 }

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { LanguageService } from 'typescript/lib/tsserverlibrary';
+import * as ts from 'typescript/lib/tsserverlibrary';
 import Logger from './logger';
 import StandardScriptSourceHelper from './standard-script-source-helper';
 import TemplateLanguageService from './template-language-service';
@@ -28,22 +28,24 @@ const nullLogger = new class NullLogger implements Logger {
 /**
  * Augments a TypeScript language service with language support for the contents
  * of template strings.
- * 
+ *
  * @param languageService Base language service to augment.
  * @param templateService Language service for contents of template strings.
  * @param templateSettings Determines how template strings are processed
  * @param additionalConfig Additional configuration for the service
  */
 export function decorateWithTemplateLanguageService(
-    languageService: LanguageService,
+    typescript: typeof ts,
+    languageService: ts.LanguageService,
     templateService: TemplateLanguageService,
     templateSettings: TemplateSettings,
     additionalConfig?: AdditionalConfiguration
 ): ts.LanguageService {
     return new TemplateLanguageServiceDecorator(
         new StandardTemplateSourceHelper(
+            typescript,
             templateSettings,
-            new StandardScriptSourceHelper(languageService)),
+            new StandardScriptSourceHelper(typescript, languageService)),
         templateService,
         (additionalConfig && additionalConfig.logger || nullLogger)
     ).decorate(languageService);

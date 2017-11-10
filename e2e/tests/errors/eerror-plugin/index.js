@@ -35,7 +35,7 @@ class TestStringLanguageService {
 }
 
 module.exports = createPlugin(
-    (_log) => {
+    (_typescript, _log) => {
         return new TestStringLanguageService();
     }, {
         tags: ['test'],

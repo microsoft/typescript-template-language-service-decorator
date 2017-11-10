@@ -10,6 +10,7 @@ import TemplateSettings from './template-settings';
 
 class StandardTemplateContext implements TemplateContext {
     constructor(
+        public readonly typescript: typeof ts,
         public readonly fileName: string,
         public readonly node: ts.TemplateLiteral,
         private readonly helper: ScriptSourceHelper,
@@ -38,7 +39,7 @@ class StandardTemplateContext implements TemplateContext {
 
     public get text(): string {
         const literalContents = this.node.getText().slice(1, -1);
-        if (this.node.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
+        if (this.node.kind === this.typescript.SyntaxKind.NoSubstitutionTemplateLiteral) {
             return literalContents;
         }
 
@@ -66,6 +67,7 @@ class StandardTemplateContext implements TemplateContext {
 
 export default class StandardTemplateSourceHelper implements TemplateSourceHelper {
     constructor(
+        private readonly typescript: typeof ts,
         private readonly templateStringSettings: TemplateSettings,
         private readonly helper: ScriptSourceHelper
     ) { }
@@ -87,7 +89,7 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
         }
 
         // Make sure we are not inside of a placeholder
-        if (node.kind === ts.SyntaxKind.TemplateExpression) {
+        if (node.kind === this.typescript.SyntaxKind.TemplateExpression) {
             let start = node.head.end;
             for (const child of node.templateSpans.map(x => x.literal)) {
                 const nextStart = child.getStart();
@@ -99,6 +101,7 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
         }
 
         return new StandardTemplateContext(
+            this.typescript,
             fileName,
             node,
             this.helper,
@@ -112,7 +115,7 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
         for (const node of this.helper.getAllNodes(fileName, n => this.getValidTemplateNode(this.templateStringSettings, n) !== undefined)) {
             const validNode = this.getValidTemplateNode(this.templateStringSettings, node);
             if (validNode) {
-                out.push(new StandardTemplateContext(fileName, validNode, this.helper, this.templateStringSettings));
+                out.push(new StandardTemplateContext(this.typescript, fileName, validNode, this.helper, this.templateStringSettings));
             }
         }
         return out;
@@ -135,26 +138,26 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
             return undefined;
         }
         switch (node.kind) {
-            case ts.SyntaxKind.TaggedTemplateExpression:
+            case this.typescript.SyntaxKind.TaggedTemplateExpression:
                 if (isTagged(node as ts.TaggedTemplateExpression, templateStringSettings.tags)) {
                     return (node as ts.TaggedTemplateExpression).template;
                 }
                 return undefined;
 
-            case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
-                if (isTaggedLiteral(node as ts.NoSubstitutionTemplateLiteral, templateStringSettings.tags)) {
+            case this.typescript.SyntaxKind.NoSubstitutionTemplateLiteral:
+                if (isTaggedLiteral(this.typescript, node as ts.NoSubstitutionTemplateLiteral, templateStringSettings.tags)) {
                     return node as ts.NoSubstitutionTemplateLiteral;
                 }
                 return undefined;
 
-            case ts.SyntaxKind.TemplateHead:
+            case this.typescript.SyntaxKind.TemplateHead:
                 if (!templateStringSettings.enableForStringWithSubstitutions || !node.parent || !node.parent.parent) {
                     return undefined;
                 }
                 return this.getValidTemplateNode(templateStringSettings, node.parent.parent);
 
-            case ts.SyntaxKind.TemplateMiddle:
-            case ts.SyntaxKind.TemplateTail:
+            case this.typescript.SyntaxKind.TemplateMiddle:
+            case this.typescript.SyntaxKind.TemplateTail:
                 if (!templateStringSettings.enableForStringWithSubstitutions || !node.parent || !node.parent.parent) {
                     return undefined;
                 }

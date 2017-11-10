@@ -13,9 +13,10 @@ module.exports = (createTemplateLanguageService, settings) => {
     return (mod) => ({
         create(info) {
             const log = (msg) => info.project.projectService.logger.info('!!!!! ' + msg);
-            const adapter = createTemplateLanguageService(log);
+            const adapter = createTemplateLanguageService(mod.typescript, log);
             log('loaded plugin');
             return template.decorateWithTemplateLanguageService(
+                mod.typescript,
                 info.languageService,
                 adapter,
                 settings,
