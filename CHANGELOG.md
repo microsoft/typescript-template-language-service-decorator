@@ -1,6 +1,9 @@
 # Changelog
 
-## 1.0.0
+## 1.0.1 - Novermber 9, 2017
+- Do not require a peer depdency on TypeScript.
+
+## 1.0.0 - Novermber 9, 2017
 - Do not take runtime dependency on TypeScript.
 
 ## 0.1.3
