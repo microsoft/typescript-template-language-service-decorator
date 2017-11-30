@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.2 - Novermber 29, 2017
+- Fix completion provider for TS 2.6.2 API changes.
+
 ## 1.0.1 - Novermber 9, 2017
 - Do not require a peer depdency on TypeScript.
 

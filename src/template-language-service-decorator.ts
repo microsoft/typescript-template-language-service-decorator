@@ -88,10 +88,10 @@ export default class TemplateLanguageServiceProxy {
         }
 
         const call = this.templateStringService.getCompletionsAtPosition;
-        this.wrap('getCompletionsAtPosition', delegate => (fileName: string, position: number) => {
+        this.wrap('getCompletionsAtPosition', delegate => (fileName: string, position: number, options: any) => {
             const context = this.sourceHelper.getTemplate(fileName, position);
             if (!context) {
-                return delegate(fileName, position);
+                return delegate(fileName, position, options);
             }
 
             return call.call(this.templateStringService,
