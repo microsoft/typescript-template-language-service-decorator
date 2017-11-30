@@ -1,6 +1,6 @@
 {
   "name": "typescript-template-language-service-decorator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Framework for decorating a TypeScript language service with support for languages embedded in template strings",
   "keywords": [
     "TypeScript",
@@ -28,7 +28,7 @@
     "glob": "^7.1.2",
     "mocha": "^3.5.3",
     "tslint": "^5.3.2",
-    "typescript": "^2.5.3"
+    "typescript": "^2.6.2"
   },
   "scripts": {
     "compile": "./node_modules/.bin/tsc -p .",
