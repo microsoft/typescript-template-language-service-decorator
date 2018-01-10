@@ -12,6 +12,12 @@ export default interface TemplateLanguageService {
         position: ts.LineAndCharacter
     ): ts.CompletionInfo;
 
+    getCompletionEntryDetails?(
+        context: TemplateContext,
+        position: ts.LineAndCharacter,
+        name: string
+    ): ts.CompletionEntryDetails;
+
     getQuickInfoAtPosition?(
         context: TemplateContext,
         position: ts.LineAndCharacter

@@ -5,7 +5,7 @@
 
 import * as ts from 'typescript/lib/tsserverlibrary';
 import Logger from './logger';
-import TemplateStringLanguageService from './template-language-service';
+import TemplateLanguageService from './template-language-service';
 import TemplateContext from './template-context';
 import TemplateSourceHelper from './template-source-helper';
 
@@ -18,10 +18,11 @@ export default class TemplateLanguageServiceProxy {
 
     constructor(
         private readonly sourceHelper: TemplateSourceHelper,
-        private readonly templateStringService: TemplateStringLanguageService,
+        private readonly templateStringService: TemplateLanguageService,
         private readonly logger: Logger
     ) {
         this.tryAdaptGetCompletionsAtPosition();
+        this.tryAdaptGetCompletionEntryDetails();
         this.tryAdaptGetQuickInfoAtPosition();
         this.tryAdaptGetSemanticDiagnostics();
         this.tryAdaptGetSyntaxDiagnostics();
@@ -63,13 +64,12 @@ export default class TemplateLanguageServiceProxy {
             return;
         }
 
-        const call = this.templateStringService.getQuickInfoAtPosition;
         this.wrap('getQuickInfoAtPosition', delegate => (fileName: string, position: number): ts.QuickInfo => {
             const context = this.sourceHelper.getTemplate(fileName, position);
             if (!context) {
                 return delegate(fileName, position);
             }
-            const quickInfo: ts.QuickInfo | undefined = call.call(this.templateStringService, context, this.sourceHelper.getRelativePosition(context, position));
+            const quickInfo: ts.QuickInfo | undefined = this.templateStringService.getQuickInfoAtPosition!(context, this.sourceHelper.getRelativePosition(context, position));
             if (quickInfo) {
                 return Object.assign({}, quickInfo, {
                     textSpan: {
@@ -87,16 +87,36 @@ export default class TemplateLanguageServiceProxy {
             return;
         }
 
-        const call = this.templateStringService.getCompletionsAtPosition;
-        this.wrap('getCompletionsAtPosition', delegate => (fileName: string, position: number, options?: any) => {
+        this.wrap('getCompletionsAtPosition', delegate => (fileName: string, position: number, ...rest: any[]) => {
             const context = this.sourceHelper.getTemplate(fileName, position);
             if (!context) {
-                return (delegate as any)(fileName, position, options);
+                return (delegate as any)(fileName, position, ...rest);
             }
 
-            return call.call(this.templateStringService,
+            return this.templateStringService.getCompletionsAtPosition!(
                 context,
                 this.sourceHelper.getRelativePosition(context, position));
+        });
+    }
+
+    private tryAdaptGetCompletionEntryDetails() {
+        if (!this.templateStringService.getCompletionEntryDetails) {
+            this.logger.log('aa' + this.templateStringService.getCompletionsAtPosition);
+            return;
+        }
+        this.logger.log('loaded');
+
+        this.wrap('getCompletionEntryDetails', delegate => (fileName: string, position: number, name: string, ...rest: any[]) => {
+
+            const context = this.sourceHelper.getTemplate(fileName, position);
+            if (!context) {
+                return (delegate as any)(fileName, position, name, ...rest);
+            }
+
+            return this.templateStringService.getCompletionEntryDetails!(
+                context,
+                this.sourceHelper.getRelativePosition(context, position),
+                name);
         });
     }
 
@@ -105,8 +125,7 @@ export default class TemplateLanguageServiceProxy {
             return;
         }
 
-        const call = this.templateStringService.getFormattingEditsForRange;
-        this.wrap('getFormattingEditsForRange', delegate => (fileName: string, start: number, end: number, options: ts.FormatCodeOptions | ts.FormatCodeSettings) => {
+        this.wrap('getFormattingEditsForRange', delegate => (fileName: string, start: number, end: number, options: ts.FormatCodeSettings) => {
             const templateEdits: ts.TextChange[] = [];
             for (const template of this.sourceHelper.getAllTemplates(fileName)) {
                 const nodeStart = template.node.getStart() + 1;
@@ -117,7 +136,7 @@ export default class TemplateLanguageServiceProxy {
 
                 const templateStart = Math.max(0, start - nodeStart);
                 const templateEnd = Math.min(nodeEnd - nodeStart, end - nodeStart);
-                for (const change of call.call(this.templateStringService, template, templateStart, templateEnd, options)) {
+                for (const change of this.templateStringService.getFormattingEditsForRange!(template, templateStart, templateEnd, options)) {
                     templateEdits.push(this.translateTextChange(template, change));
                 }
             }

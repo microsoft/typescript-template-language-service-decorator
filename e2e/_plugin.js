@@ -6,12 +6,12 @@
 const template = require('../lib/index');
 
 /**
- * @param {function(): void} createTemplateLanguageService
+ * @param {function(): template.TemplateLanguageService} createTemplateLanguageService
  * @param {template.TemplateStringSettings} settings
  */
 module.exports = (createTemplateLanguageService, settings) => {
     return (mod) => ({
-        create(info) {
+        create(info) { 
             const log = (msg) => info.project.projectService.logger.info('!!!!! ' + msg);
             const adapter = createTemplateLanguageService(mod.typescript, log);
             log('loaded plugin');
