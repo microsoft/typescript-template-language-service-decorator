@@ -13,12 +13,13 @@ export default class StandardScriptSourceHelper implements ScriptSourceHelper {
     ) { }
 
     public getNode(fileName: string, position: number) {
-        return findNode(this.typescript, this.languageService.getProgram().getSourceFile(fileName), position);
+        const s = this.languageService.getProgram().getSourceFile(fileName);
+        return s && findNode(this.typescript, s, position);
     }
 
     public getAllNodes(fileName: string, cond: (n: ts.Node) => boolean) {
         const s = this.languageService.getProgram().getSourceFile(fileName);
-        return findAllNodes(this.typescript, s, cond);
+        return s ? findAllNodes(this.typescript, s, cond) : [];
     }
 
     public getLineAndChar(fileName: string, position: number): ts.LineAndCharacter {
