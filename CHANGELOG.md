@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.0 - January 9, 2018
+- Add wrapper for `completionEntryDetails`.
+
 ## 1.0.2 - Novermber 29, 2017
 - Fix completion provider for TS 2.6.2 API changes.
 
