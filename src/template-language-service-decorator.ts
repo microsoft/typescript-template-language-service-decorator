@@ -44,7 +44,7 @@ export default class TemplateLanguageServiceProxy {
 
         const call = this.templateStringService.getSyntacticDiagnostics.bind(this.templateStringService);
         this.wrap('getSyntacticDiagnostics', delegate => (fileName: string) => {
-            return this.adapterDiagnosticsCall(delegate, call, fileName);
+            return this.adaptDiagnosticsCall(delegate, call, fileName);
         });
     }
 
@@ -55,7 +55,7 @@ export default class TemplateLanguageServiceProxy {
 
         const call = this.templateStringService.getSemanticDiagnostics.bind(this.templateStringService);
         this.wrap('getSemanticDiagnostics', delegate => (fileName: string) => {
-            return this.adapterDiagnosticsCall(delegate, call, fileName);
+            return this.adaptDiagnosticsCall(delegate, call, fileName);
         });
     }
 
@@ -69,6 +69,7 @@ export default class TemplateLanguageServiceProxy {
             if (!context) {
                 return delegate(fileName, position);
             }
+
             const quickInfo: ts.QuickInfo | undefined = this.templateStringService.getQuickInfoAtPosition!(context, this.sourceHelper.getRelativePosition(context, position));
             if (quickInfo) {
                 return Object.assign({}, quickInfo, {
@@ -100,6 +101,10 @@ export default class TemplateLanguageServiceProxy {
     }
 
     private tryAdaptGetCompletionEntryDetails() {
+        if (!this.templateStringService.getCompletionEntryDetails) {
+            return;
+        }
+
         this.wrap('getCompletionEntryDetails', delegate => (fileName: string, position: number, name: string, ...rest: any[]) => {
             const context = this.sourceHelper.getTemplate(fileName, position);
             if (!context) {
@@ -146,7 +151,7 @@ export default class TemplateLanguageServiceProxy {
         return this;
     }
 
-    private adapterDiagnosticsCall(
+    private adaptDiagnosticsCall(
         delegate: (fileName: string) => ts.Diagnostic[],
         implementation: (context: TemplateContext) => ts.Diagnostic[],
         fileName: string
