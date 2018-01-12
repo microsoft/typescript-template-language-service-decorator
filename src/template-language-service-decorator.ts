@@ -32,7 +32,7 @@ export default class TemplateLanguageServiceProxy {
     public decorate(languageService: ts.LanguageService) {
         const ret: any = languageService;
         this._wrappers.forEach(({ name, wrapper }) => {
-            ret[name] = wrapper((languageService as any)[name]);
+            ret[name] = wrapper((languageService as any) [name]);
         });
         return ret;
     }
@@ -100,14 +100,7 @@ export default class TemplateLanguageServiceProxy {
     }
 
     private tryAdaptGetCompletionEntryDetails() {
-        if (!this.templateStringService.getCompletionEntryDetails) {
-            this.logger.log('aa' + this.templateStringService.getCompletionsAtPosition);
-            return;
-        }
-        this.logger.log('loaded');
-
         this.wrap('getCompletionEntryDetails', delegate => (fileName: string, position: number, name: string, ...rest: any[]) => {
-
             const context = this.sourceHelper.getTemplate(fileName, position);
             if (!context) {
                 return (delegate as any)(fileName, position, name, ...rest);
