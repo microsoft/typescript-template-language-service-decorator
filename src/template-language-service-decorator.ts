@@ -14,7 +14,7 @@ type LanguageServiceMethodWrapper<K extends keyof ts.LanguageService>
 
 export default class TemplateLanguageServiceProxy {
 
-    private _wrappers: any[] = [];
+    private readonly _wrappers: any[] = [];
 
     constructor(
         private readonly sourceHelper: TemplateSourceHelper,
