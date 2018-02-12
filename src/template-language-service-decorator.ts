@@ -27,6 +27,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetSemanticDiagnostics();
         this.tryAdaptGetSyntaxDiagnostics();
         this.tryAdaptGetFormattingEditsForRange();
+        this.tryAdaptGetCodeFixesAtPosition();
     }
 
     public decorate(languageService: ts.LanguageService) {
@@ -146,6 +147,34 @@ export default class TemplateLanguageServiceProxy {
         });
     }
 
+    private tryAdaptGetCodeFixesAtPosition() {
+        if (!this.templateStringService.getCodeFixesAtPosition) {
+            return;
+        }
+
+        this.wrap('getCodeFixesAtPosition', delegate => (fileName: string, start: number, end: number, errorCodes: number[], options: ts.FormatCodeSettings) => {
+            const templateActions: ts.CodeAction[] = [];
+            for (const template of this.sourceHelper.getAllTemplates(fileName)) {
+                const nodeStart = template.node.getStart() + 1;
+                const nodeEnd = template.node.getEnd() - 1;
+                if (end < nodeStart || start > nodeEnd) {
+                    continue;
+                }
+
+                const templateStart = Math.max(0, start - nodeStart);
+                const templateEnd = Math.min(nodeEnd - nodeStart, end - nodeStart);
+                for (const codeAction of this.templateStringService.getCodeFixesAtPosition!(template, templateStart, templateEnd, errorCodes, options)) {
+                    templateActions.push(this.translateCodeAction(template, codeAction));
+                }
+            }
+
+            return [
+                ...delegate(fileName, start, end, errorCodes, options),
+                ...templateActions,
+            ];
+        });
+    }
+
     private wrap<K extends keyof ts.LanguageService>(name: K, wrapper: LanguageServiceMethodWrapper<K>) {
         this._wrappers.push({ name, wrapper });
         return this;
@@ -176,5 +205,25 @@ export default class TemplateLanguageServiceProxy {
     ): ts.TextChange {
         textChangeInTemplate.span.start += context.node.getStart() + 1;
         return textChangeInTemplate;
+    }
+
+    private translateFileTextChange(
+        context: TemplateContext,
+        changes: ts.FileTextChanges
+    ): ts.FileTextChanges {
+        return {
+            fileName: changes.fileName,
+            textChanges: changes.textChanges.map(textChange => this.translateTextChange(context, textChange))
+        }
+    }
+
+    private translateCodeAction(
+        context: TemplateContext,
+        action: ts.CodeAction
+    ): ts.CodeAction {
+        return {
+            description: action.description,
+            changes: action.changes.map(change => this.translateFileTextChange(context, change))
+        }
     }
 }

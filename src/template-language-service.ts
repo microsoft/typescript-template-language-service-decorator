@@ -37,4 +37,12 @@ export default interface TemplateLanguageService {
         end: number,
         settings: ts.EditorSettings
     ): ts.TextChange[];
+
+    getCodeFixesAtPosition?(
+        context: TemplateContext,
+        start: number,
+        end: number,
+        errorCodes: number[],
+        formatOptions: ts.FormatCodeSettings
+    ): ts.CodeAction[];
 }
