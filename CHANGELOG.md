@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.0 - February 12, 2018
+- Add wrapper for `getCodeFixesAtPosition`.
+
 ## 1.1.0 - January 9, 2018
 - Add wrapper for `completionEntryDetails`.
 
