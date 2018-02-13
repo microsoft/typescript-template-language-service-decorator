@@ -38,6 +38,8 @@ export default interface TemplateLanguageService {
         settings: ts.EditorSettings
     ): ts.TextChange[];
 
+    getSupportedCodeFixes?(): number[];
+
     getCodeFixesAtPosition?(
         context: TemplateContext,
         start: number,

@@ -42,6 +42,7 @@ export function decorateWithTemplateLanguageService(
     additionalConfig?: AdditionalConfiguration
 ): ts.LanguageService {
     return new TemplateLanguageServiceDecorator(
+        typescript,
         new StandardTemplateSourceHelper(
             typescript,
             templateSettings,

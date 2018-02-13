@@ -17,6 +17,7 @@ export default class TemplateLanguageServiceProxy {
     private readonly _wrappers: any[] = [];
 
     constructor(
+        private readonly typescript: typeof ts,
         private readonly sourceHelper: TemplateSourceHelper,
         private readonly templateStringService: TemplateLanguageService,
         private readonly logger: Logger
@@ -28,6 +29,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetSyntaxDiagnostics();
         this.tryAdaptGetFormattingEditsForRange();
         this.tryAdaptGetCodeFixesAtPosition();
+        this.tryAdaptGetSupportedCodeFixes();
     }
 
     public decorate(languageService: ts.LanguageService) {
@@ -175,6 +177,19 @@ export default class TemplateLanguageServiceProxy {
         });
     }
 
+    private tryAdaptGetSupportedCodeFixes() {
+        if (!this.templateStringService.getSupportedCodeFixes) {
+            return;
+        }
+        const delegate = this.typescript.getSupportedCodeFixes.bind(this.typescript);
+        this.typescript.getSupportedCodeFixes = () => {
+            return [
+                ...delegate(),
+                ...this.templateStringService.getSupportedCodeFixes!(),
+            ];
+        };
+    }
+
     private wrap<K extends keyof ts.LanguageService>(name: K, wrapper: LanguageServiceMethodWrapper<K>) {
         this._wrappers.push({ name, wrapper });
         return this;
@@ -213,8 +228,8 @@ export default class TemplateLanguageServiceProxy {
     ): ts.FileTextChanges {
         return {
             fileName: changes.fileName,
-            textChanges: changes.textChanges.map(textChange => this.translateTextChange(context, textChange))
-        }
+            textChanges: changes.textChanges.map(textChange => this.translateTextChange(context, textChange)),
+        };
     }
 
     private translateCodeAction(
@@ -223,7 +238,7 @@ export default class TemplateLanguageServiceProxy {
     ): ts.CodeAction {
         return {
             description: action.description,
-            changes: action.changes.map(change => this.translateFileTextChange(context, change))
-        }
+            changes: action.changes.map(change => this.translateFileTextChange(context, change)),
+        };
     }
 }
