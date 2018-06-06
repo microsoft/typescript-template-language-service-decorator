@@ -47,4 +47,9 @@ export default interface TemplateLanguageService {
         errorCodes: number[],
         formatOptions: ts.FormatCodeSettings
     ): ts.CodeAction[];
+    
+    getDefinitionAtPosition?(
+        context: TemplateContext,
+        position: ts.LineAndCharacter
+    ): ts.DefinitionInfo[];
 }
