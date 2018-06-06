@@ -7,10 +7,15 @@ const { openMockFile, getFirstResponseOfType, getResponsesOfType } = require('..
 
 const mockFileName = 'main.ts';
 
+const createServerWithMockFile = (fileContents) => {
+    const server = createServer(__dirname, 'echo-plugin');
+    openMockFile(server, mockFileName, fileContents);
+    return server;
+}
+
 describe('Completions', () => {
     it('should return completions inside tagged, single line template', () => {
-        const server = createServer(__dirname);
-        openMockFile(server, mockFileName, 'const q = test`abcdefg`');
+        const server = createServerWithMockFile('const q = test`abcdefg`');
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 16, line: 1, prefix: '' } });
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 18, line: 1, prefix: '' } });
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 23, line: 1, prefix: '' } });
@@ -37,8 +42,7 @@ describe('Completions', () => {
     });
 
     it('should not return completions before tagged template', () => {
-        const server = createServer(__dirname);
-        openMockFile(server, mockFileName, 'const q = test`abcdefg`');
+        const server = createServerWithMockFile('const q = test`abcdefg`');
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 1, line: 1, prefix: '' } });
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 15, line: 1, prefix: '' } });
 
@@ -53,8 +57,7 @@ describe('Completions', () => {
     });
 
     it('should return completions for template tag ending with tag name', () => {
-        const server = createServer(__dirname);
-        openMockFile(server, mockFileName, 'const q = this.is().a.test`abcdefg`');
+        const server = createServerWithMockFile('const q = this.is().a.test`abcdefg`');
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 30, line: 1, prefix: '' } });
 
         return server.close().then(() => {
@@ -67,22 +70,21 @@ describe('Completions', () => {
     });
 
     it('should not return completions for non-tagged template', () => {
-        const server = createServer(__dirname);
-        openMockFile(server, mockFileName, 'const q = `abcdefg`');
+        const server = createServerWithMockFile('const q = `abcdefg`');
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 12, line: 1, prefix: '' } });
 
         return server.close().then(() => {
             const response = getFirstResponseOfType('completions', server);
-            assert.isFalse(response.success);
+            assert.isTrue(response.success);
+            assert.strictEqual(response.body.length, 0);
         });
     });
 
     it('should return completions for multiline strings', () => {
-        const server = createServer(__dirname);
-        openMockFile(server, mockFileName, [
+        const server = createServerWithMockFile([
             'const q = test`abc',
             'cdefg`'
-        ].join('\n'));
+        ].join('\n')); 
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 1, line: 2, prefix: '' } });
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 3, line: 2, prefix: '' } });
 
@@ -100,8 +102,7 @@ describe('Completions', () => {
     });
 
     it('should ignore placeholders in string', () => {
-        const server = createServer(__dirname);
-        openMockFile(server, mockFileName, 'test`abc${123}e${4}${5}fg`');
+        const server = createServerWithMockFile('test`abc${123}e${4}${5}fg`');
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 8, line: 1, prefix: '' } });
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 16, line: 1, prefix: '' } });
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 25, line: 1, prefix: '' } });
@@ -128,8 +129,7 @@ describe('Completions', () => {
     });
 
     it('should allow tag to have space after it', () => {
-        const server = createServer(__dirname);
-        openMockFile(server, mockFileName, 'const q = test            `abcdefg`');
+        const server = createServerWithMockFile('const q = test            `abcdefg`');
         server.send({ command: 'completions', arguments: { file: mockFileName, offset: 30, line: 1, prefix: '' } });
 
         return server.close().then(() => {
