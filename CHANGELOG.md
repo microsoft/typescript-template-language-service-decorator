@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.0 - June 29, 2018
+- Add wrapper for `getSignatureHelpItems`.
+
 ## 1.2.0 - February 12, 2018
 - Add wrapper for `getCodeFixesAtPosition`.
 
