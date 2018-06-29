@@ -23,6 +23,7 @@
   ],
   "dependencies": {},
   "devDependencies": {
+    "@types/mocha": "^5.2.3",
     "@types/node": "^7.0.22",
     "chai": "^4.1.2",
     "glob": "^7.1.2",
