@@ -30,6 +30,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetFormattingEditsForRange();
         this.tryAdaptGetCodeFixesAtPosition();
         this.tryAdaptGetSupportedCodeFixes();
+        this.tryAdaptGetSignatureHelpItemsAtPosition();
     }
 
     public decorate(languageService: ts.LanguageService) {
@@ -188,6 +189,23 @@ export default class TemplateLanguageServiceProxy {
                 ...this.templateStringService.getSupportedCodeFixes!(),
             ];
         };
+    }
+
+    private tryAdaptGetSignatureHelpItemsAtPosition() {
+        if (!this.templateStringService.getSignatureHelpItemsAtPosition) {
+            return;
+        }
+
+        this.wrap('getSignatureHelpItems', delegate => (fileName: string, position: number, ...rest: any[]) => {
+            const context = this.sourceHelper.getTemplate(fileName, position);
+            if (!context) {
+                return (delegate as any)(fileName, position, ...rest);
+            }
+
+            return this.templateStringService.getSignatureHelpItemsAtPosition!(
+                context,
+                this.sourceHelper.getRelativePosition(context, position));
+        });
     }
 
     private wrap<K extends keyof ts.LanguageService>(name: K, wrapper: LanguageServiceMethodWrapper<K>) {
