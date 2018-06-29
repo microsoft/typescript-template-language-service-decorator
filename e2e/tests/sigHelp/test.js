@@ -11,7 +11,7 @@ describe('SignatureHelp', () => {
             'const q = test`abcdefg`',
             { offset: 17, line: 1 }
         ).then(sigHelpResponse => {
-            assert.strictEqual(sigHelpResponse.items.length, 0);
+            assert.strictEqual(sigHelpResponse, undefined);
         });
     });
 
