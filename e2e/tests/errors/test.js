@@ -14,7 +14,7 @@ const createServerWithMockFile = (fileContents) => {
 
 describe('Errors', () => {
     it('should return errors for single line template string ', () => {
-        const server = createServerWithMockFile('function test(x) { return x; }; const q = test`eXeeXe`');
+        const server = createServerWithMockFile('function etag(x) { return x; }; const q = etag`eXeeXe`');
         server.send({ command: 'semanticDiagnosticsSync', arguments: { file: mockFileName } });
 
         return server.close().then(() => {
@@ -35,7 +35,7 @@ describe('Errors', () => {
     });
 
     it('should not return errors in placeholders', () => {
-        const server = createServerWithMockFile('function test(x, y) { return x; }; const q = test`e${1}e`');
+        const server = createServerWithMockFile('function etag(x, y) { return x; }; const q = etag`e${1}e`');
         server.send({ command: 'semanticDiagnosticsSync', arguments: { file: mockFileName } });
 
         return server.close().then(() => {
