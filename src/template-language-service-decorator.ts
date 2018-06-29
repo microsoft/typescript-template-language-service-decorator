@@ -202,9 +202,10 @@ export default class TemplateLanguageServiceProxy {
                 return (delegate as any)(fileName, position, ...rest);
             }
 
-            return this.templateStringService.getSignatureHelpItemsAtPosition!(
+            const signatureHelp = this.templateStringService.getSignatureHelpItemsAtPosition!(
                 context,
                 this.sourceHelper.getRelativePosition(context, position));
+            return signatureHelp ? this.translateSignatureHelpItems(context, signatureHelp) : undefined;
         });
     }
 
@@ -257,6 +258,20 @@ export default class TemplateLanguageServiceProxy {
         return {
             description: action.description,
             changes: action.changes.map(change => this.translateFileTextChange(context, change)),
+        };
+    }
+
+    private translateSignatureHelpItems(
+        context: TemplateContext,
+        signatureHelp: ts.SignatureHelpItems
+    ): ts.SignatureHelpItems {
+        const applicableSpan = signatureHelp.applicableSpan;
+        return {
+            ...signatureHelp,
+            applicableSpan: {
+                start: context.node.getStart() + 1 + (applicableSpan.start || 0),
+                length: signatureHelp.applicableSpan.length,
+            },
         };
     }
 }

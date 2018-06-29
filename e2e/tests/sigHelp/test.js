@@ -38,6 +38,18 @@ describe('SignatureHelp', () => {
             assert.strictEqual(firstItem.prefixDisplayParts[0].text, 'b');
         });
     });
+
+    it('should correctly update applicableSpan', () => {
+        return getSigHelpInMockFile(
+            'const q = test`a(b`',
+            { offset: 18, line: 1 }
+        ).then(sigHelpResponse => {
+            assert.strictEqual(sigHelpResponse.items.length, 1);
+
+            assert.strictEqual(sigHelpResponse.applicableSpan.start.line, 1);
+            assert.strictEqual(sigHelpResponse.applicableSpan.start.offset, 17);
+        });
+    });
 });
 
 
