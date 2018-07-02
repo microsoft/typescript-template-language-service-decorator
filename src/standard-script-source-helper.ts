@@ -24,11 +24,11 @@ export default class StandardScriptSourceHelper implements ScriptSourceHelper {
 
     public getLineAndChar(fileName: string, position: number): ts.LineAndCharacter {
         const s = this.languageService.getProgram().getSourceFile(fileName);
-        return this.typescript.getLineAndCharacterOfPosition(s, position);
+        return this.typescript.getLineAndCharacterOfPosition(s!, position);
     }
 
     public getOffset(fileName: string, line: number, character: number) {
         const s = this.languageService.getProgram().getSourceFile(fileName);
-        return this.typescript.getPositionOfLineAndCharacter(s, line, character);
+        return this.typescript.getPositionOfLineAndCharacter(s!, line, character);
     }
 }
