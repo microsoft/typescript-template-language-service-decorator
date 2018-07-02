@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0 - July 2, 2018
+- Allow `getCodeFixesAtPosition` to return `CodeFixAction`.
+- Fixed templated tags not being detected.
+
 ## 1.3.0 - June 29, 2018
 - Add wrapper for `getSignatureHelpItems`.
 
