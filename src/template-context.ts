@@ -7,24 +7,24 @@ import * as ts from 'typescript/lib/tsserverlibrary';
  *
  */
 export default interface TemplateContext {
-    typescript: typeof ts;
+    readonly typescript: typeof ts;
 
     /**
      * Name of the file the template is in.
      */
-    fileName: string;
+    readonly fileName: string;
 
     /**
      * Contents of the template.
      *
      * Has substitutions already replaced.
      */
-    text: string;
+    readonly text: string;
 
     /**
      * AST node.
      */
-    node: ts.TemplateLiteral;
+    readonly node: ts.TemplateLiteral;
 
     /**
      * Map a location from within the template string to an offset within the template string
