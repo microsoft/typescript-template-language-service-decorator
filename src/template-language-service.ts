@@ -44,9 +44,9 @@ export default interface TemplateLanguageService {
         context: TemplateContext,
         start: number,
         end: number,
-        errorCodes: number[],
+        errorCodes: ReadonlyArray<number>,
         formatOptions: ts.FormatCodeSettings
-    ): ts.CodeAction[];
+    ): Array<ts.CodeAction | ts.CodeFixAction>;
 
     getSignatureHelpItemsAtPosition?(
         context: TemplateContext,

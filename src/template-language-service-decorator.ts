@@ -48,7 +48,7 @@ export default class TemplateLanguageServiceProxy {
 
         const call = this.templateStringService.getSyntacticDiagnostics.bind(this.templateStringService);
         this.wrap('getSyntacticDiagnostics', delegate => (fileName: string) => {
-            return this.adaptDiagnosticsCall(delegate, call, fileName);
+            return this.adaptDiagnosticsCall(delegate, call, fileName) as ts.DiagnosticWithLocation[];
         });
     }
 
@@ -155,8 +155,8 @@ export default class TemplateLanguageServiceProxy {
             return;
         }
 
-        this.wrap('getCodeFixesAtPosition', delegate => (fileName: string, start: number, end: number, errorCodes: number[], options: ts.FormatCodeSettings) => {
-            const templateActions: ts.CodeAction[] = [];
+        this.wrap('getCodeFixesAtPosition', delegate => (fileName: string, start: number, end: number, errorCodes: ReadonlyArray<number>, options: ts.FormatCodeSettings, preferences: ts.UserPreferences) => {
+            const templateActions: ts.CodeFixAction[] = [];
             for (const template of this.sourceHelper.getAllTemplates(fileName)) {
                 const nodeStart = template.node.getStart() + 1;
                 const nodeEnd = template.node.getEnd() - 1;
@@ -172,7 +172,7 @@ export default class TemplateLanguageServiceProxy {
             }
 
             return [
-                ...delegate(fileName, start, end, errorCodes, options),
+                ...delegate(fileName, start, end, errorCodes, options, preferences),
                 ...templateActions,
             ];
         });
@@ -253,10 +253,11 @@ export default class TemplateLanguageServiceProxy {
 
     private translateCodeAction(
         context: TemplateContext,
-        action: ts.CodeAction
-    ): ts.CodeAction {
+        action: ts.CodeFixAction | ts.CodeAction
+    ): ts.CodeFixAction {
         return {
-            description: action.description,
+            ...action,
+            fixName: (action as ts.CodeFixAction).fixName || '',
             changes: action.changes.map(change => this.translateFileTextChange(context, change)),
         };
     }
