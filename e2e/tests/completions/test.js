@@ -15,12 +15,12 @@ const createServerWithMockFile = (fileContents) => {
 
 describe('Completions', () => {
     it('should return completions inside tagged, single line template', () => {
-        const server = createServerWithMockFile('const q = test`abcdefg`');
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 16, line: 1, prefix: '' } });
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 18, line: 1, prefix: '' } });
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 23, line: 1, prefix: '' } });
-
-        return server.close().then(() => {
+        return getCompletionsInMockFile(
+            'const q = test`abcdefg`',
+            { offset: 16, line: 1 },
+            { offset: 18, line: 1 },
+            { offset: 23, line: 1 }
+        ).then(server => {
             const completionsResponses = getResponsesOfType('completions', server);
             assert.strictEqual(completionsResponses.length, 3);
 
@@ -42,13 +42,12 @@ describe('Completions', () => {
     });
 
     it('should not return completions before tagged template', () => {
-        const server = createServerWithMockFile('const q = test`abcdefg`');
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 1, line: 1, prefix: '' } });
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 15, line: 1, prefix: '' } });
-
-        return server.close().then(() => {
+        return getCompletionsInMockFile(
+            'const q = test`abcdefg`',
+            { offset: 1, line: 1 },
+            { offset: 15, line: 1 }
+        ).then(server => {
             const completionsResponses = getResponsesOfType('completions', server);
-
             for (const response of completionsResponses) {
                 assert.isTrue(response.success);
                 assert.isFalse(response.body.some(item => item.kindModifiers === 'echo'));
@@ -57,10 +56,10 @@ describe('Completions', () => {
     });
 
     it('should return completions for template tag ending with tag name', () => {
-        const server = createServerWithMockFile('const q = this.is().a.test`abcdefg`');
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 30, line: 1, prefix: '' } });
-
-        return server.close().then(() => {
+        return getCompletionsInMockFile(
+            'const q = this.is().a.test`abcdefg`',
+            { offset: 30, line: 1 }
+        ).then(server => {
             const response = getFirstResponseOfType('completions', server);
             assert.isTrue(response.success);
             assert.strictEqual(response.body.length, 1);
@@ -70,10 +69,10 @@ describe('Completions', () => {
     });
 
     it('should not return completions for non-tagged template', () => {
-        const server = createServerWithMockFile('const q = `abcdefg`');
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 12, line: 1, prefix: '' } });
-
-        return server.close().then(() => {
+        return getCompletionsInMockFile(
+            'const q = `abcdefg`',
+            { offset: 12, line: 1 }
+        ).then(server => {
             const response = getFirstResponseOfType('completions', server);
             assert.isTrue(response.success);
             assert.strictEqual(response.body.length, 0);
@@ -81,14 +80,14 @@ describe('Completions', () => {
     });
 
     it('should return completions for multiline strings', () => {
-        const server = createServerWithMockFile([
-            'const q = test`abc',
-            'cdefg`'
-        ].join('\n')); 
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 1, line: 2, prefix: '' } });
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 3, line: 2, prefix: '' } });
-
-        return server.close().then(() => {
+        return getCompletionsInMockFile(
+            [
+                'const q = test`abc',
+                'cdefg`'
+            ].join('\n'),
+            { offset: 1, line: 2 },
+            { offset: 3, line: 2 },
+        ).then(server => {
             const completionsResponses = getResponsesOfType('completions', server);
 
             assert.strictEqual(completionsResponses.length, 2);
@@ -102,12 +101,12 @@ describe('Completions', () => {
     });
 
     it('should ignore placeholders in string', () => {
-        const server = createServerWithMockFile('test`abc${123}e${4}${5}fg`');
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 8, line: 1, prefix: '' } });
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 16, line: 1, prefix: '' } });
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 25, line: 1, prefix: '' } });
-
-        return server.close().then(() => {
+        return getCompletionsInMockFile(
+            'test`abc${123}e${4}${5}fg`',
+            { offset: 8, line: 1 },
+            { offset: 16, line: 1 },
+            { offset: 25, line: 1 }
+        ).then(server => {
             const responses = getResponsesOfType('completions', server);
             assert.strictEqual(responses.length, 3);
 
@@ -129,10 +128,10 @@ describe('Completions', () => {
     });
 
     it('should allow tag to have space after it', () => {
-        const server = createServerWithMockFile('const q = test            `abcdefg`');
-        server.send({ command: 'completions', arguments: { file: mockFileName, offset: 30, line: 1, prefix: '' } });
-
-        return server.close().then(() => {
+        return getCompletionsInMockFile(
+            'const q = test            `abcdefg`',
+            { offset: 30, line: 1 }
+        ).then(server => {
             const response = getFirstResponseOfType('completions', server);
             assert.isTrue(response.success);
             assert.strictEqual(response.body.length, 1);
@@ -141,3 +140,13 @@ describe('Completions', () => {
         });
     });
 });
+
+function getCompletionsInMockFile(contents, ...locations) {
+    const server = createServerWithMockFile(contents);
+
+    for (const location of locations) {
+        server.send({ command: 'completions', arguments: { file: mockFileName, ...location } });
+    }
+
+    return server.close().then(() => server);
+}
