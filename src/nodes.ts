@@ -69,5 +69,8 @@ export function isTagged(node: ts.TaggedTemplateExpression, tags: string[]): boo
         || new RegExp(`$${escapeRegExp(tag)}\s*^`).test(text)
         || text.startsWith(tag + '.')
         || text.endsWith('.' + tag)
-        || text.startsWith(tag + '('));
+        || text.startsWith(tag + '(')
+        || text.startsWith(tag + '<')
+        || text.startsWith(tag + '[')
+    );
 }

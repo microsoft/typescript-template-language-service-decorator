@@ -178,9 +178,9 @@ describe('Completions', () => {
         }
         {
             const server = await getCompletionsInMockFile(
-                'const q = test.bla<number>()`abcdefg`',
-                { offset: 32, line: 1 }
-            )
+                "const q = test<number>('')`abcdefg`",
+                { offset: 30, line: 1 }
+            );
             const response = getFirstResponseOfType('completions', server);
             assert.isTrue(response.success);
             assert.strictEqual(response.body.length, 1);

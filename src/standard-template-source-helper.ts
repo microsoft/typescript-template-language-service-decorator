@@ -7,6 +7,7 @@ import ScriptSourceHelper from './script-source-helper';
 import { isTaggedLiteral, isTagged, relative } from './nodes';
 import TemplateContext from './template-context';
 import TemplateSettings from './template-settings';
+import Logger from './logger';
 
 class StandardTemplateContext implements TemplateContext {
     constructor(
@@ -69,7 +70,8 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
     constructor(
         private readonly typescript: typeof ts,
         private readonly templateStringSettings: TemplateSettings,
-        private readonly helper: ScriptSourceHelper
+        private readonly helper: ScriptSourceHelper,
+        private readonly logger: Logger
     ) { }
 
     public getTemplate(
