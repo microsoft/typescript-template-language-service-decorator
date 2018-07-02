@@ -154,48 +154,36 @@ describe('Completions', () => {
     });
 
     it('should allow tag to have template parameters', async () => {
-        {
-            const server = await getCompletionsInMockFile(
-                'const q = test<number>`abcdefg`',
-                { offset: 26, line: 1 }
-            );
-            const response = getFirstResponseOfType('completions', server);
-            assert.isTrue(response.success);
-            assert.strictEqual(response.body.length, 1);
-            assert.strictEqual(response.body[0].name, 'ab');
-            assert.strictEqual(response.body[0].kindModifiers, 'echo');
-        }
-        {
-            const server = await getCompletionsInMockFile(
-                'const q = test.bla<number>`abcdefg`',
-                { offset: 30, line: 1 }
-            );
-            const response = getFirstResponseOfType('completions', server);
-            assert.isTrue(response.success);
-            assert.strictEqual(response.body.length, 1);
-            assert.strictEqual(response.body[0].name, 'ab');
-            assert.strictEqual(response.body[0].kindModifiers, 'echo');
-        }
-        {
-            const server = await getCompletionsInMockFile(
-                "const q = test<number>('')`abcdefg`",
-                { offset: 30, line: 1 }
-            );
-            const response = getFirstResponseOfType('completions', server);
-            assert.isTrue(response.success);
-            assert.strictEqual(response.body.length, 1);
-            assert.strictEqual(response.body[0].name, 'ab');
-            assert.strictEqual(response.body[0].kindModifiers, 'echo');
-        }
+        const server = await getCompletionsInMockFile(
+            'const q = test<number>`abcdefg`',
+            { offset: 26, line: 1 }
+        );
+        const response = getFirstResponseOfType('completions', server);
+        assert.isTrue(response.success);
+        assert.strictEqual(response.body.length, 1);
+        assert.strictEqual(response.body[0].name, 'ab');
+        assert.strictEqual(response.body[0].kindModifiers, 'echo');
+    });
+
+    it('should allow call tag to have template parameters', async () => {
+        const server = await getCompletionsInMockFile(
+            "const q = test<number>('')`abcdefg`",
+            { offset: 30, line: 1 }
+        );
+        const response = getFirstResponseOfType('completions', server);
+        assert.isTrue(response.success);
+        assert.strictEqual(response.body.length, 1);
+        assert.strictEqual(response.body[0].name, 'ab');
+        assert.strictEqual(response.body[0].kindModifiers, 'echo');
     });
 });
 
-function getCompletionsInMockFile(contents, ...locations) {
-    const server = createServerWithMockFile(contents);
+    function getCompletionsInMockFile(contents, ...locations) {
+        const server = createServerWithMockFile(contents);
 
-    for (const location of locations) {
-        server.send({ command: 'completions', arguments: { file: mockFileName, ...location } });
+        for (const location of locations) {
+            server.send({ command: 'completions', arguments: { file: mockFileName, ...location } });
+        }
+
+        return server.close().then(() => server);
     }
-
-    return server.close().then(() => server);
-}
