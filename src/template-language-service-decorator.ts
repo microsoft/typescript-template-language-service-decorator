@@ -14,7 +14,7 @@ type LanguageServiceMethodWrapper<K extends keyof ts.LanguageService>
 
 export default class TemplateLanguageServiceProxy {
 
-    private readonly _wrappers: any[] = [];
+    private readonly _wrappers: Array<{ name: keyof ts.LanguageService, wrapper: LanguageServiceMethodWrapper<any> }> = [];
 
     constructor(
         private readonly typescript: typeof ts,
@@ -36,7 +36,7 @@ export default class TemplateLanguageServiceProxy {
     public decorate(languageService: ts.LanguageService) {
         const ret: any = languageService;
         this._wrappers.forEach(({ name, wrapper }) => {
-            ret[name] = wrapper((languageService as any) [name]);
+            ret[name] = wrapper(languageService[name]);
         });
         return ret;
     }
