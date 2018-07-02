@@ -43,16 +43,20 @@ class PlaceholderSubstituter {
         settings: TemplateSettings,
         contents: string,
         locations: ReadonlyArray<{ start: number, end: number }>
-    ) {
+    ): string {
         if (settings.getSubstitutions) {
             return settings.getSubstitutions(contents, locations);
         }
 
+        const parts: string[] = [];
+        let lastIndex = 0;
         for (const span of locations) {
-            contents = contents.substr(0, span.start) + this.getSubstitution(settings, contents, span.start, span.end) + contents.substr(span.end);
+            parts.push(contents.slice(lastIndex, span.start));
+            parts.push(this.getSubstitution(settings, contents, span.start, span.end));
+            lastIndex = span.end;
         }
-
-        return contents;
+        parts.push(contents.slice(lastIndex));
+        return parts.join('');
     }
 
     private static getSubstitution(
