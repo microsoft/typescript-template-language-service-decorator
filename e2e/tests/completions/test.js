@@ -139,6 +139,54 @@ describe('Completions', () => {
             assert.strictEqual(response.body[0].kindModifiers, 'echo');
         });
     });
+
+    it('should allow tag to be a function call', async () => {
+        const server = await getCompletionsInMockFile(
+            'const q = test("bla")`abcdefg`',
+            { offset: 25, line: 1 }
+        );
+        
+        const response = getFirstResponseOfType('completions', server);
+        assert.isTrue(response.success);
+        assert.strictEqual(response.body.length, 1);
+        assert.strictEqual(response.body[0].name, 'ab');
+        assert.strictEqual(response.body[0].kindModifiers, 'echo');
+    });
+
+    it('should allow tag to have template parameters', async () => {
+        await getCompletionsInMockFile(
+            'const q = test<number>`abcdefg`',
+            { offset: 26, line: 1 }
+        ).then(server => {
+            const response = getFirstResponseOfType('completions', server);
+            assert.isTrue(response.success);
+            assert.strictEqual(response.body.length, 1);
+            assert.strictEqual(response.body[0].name, 'ab');
+            assert.strictEqual(response.body[0].kindModifiers, 'echo');
+        });
+
+        await getCompletionsInMockFile(
+            'const q = test.bla<number>`abcdefg`',
+            { offset: 30, line: 1 }
+        ).then(server => {
+            const response = getFirstResponseOfType('completions', server);
+            assert.isTrue(response.success);
+            assert.strictEqual(response.body.length, 1);
+            assert.strictEqual(response.body[0].name, 'ab');
+            assert.strictEqual(response.body[0].kindModifiers, 'echo');
+        });
+
+        await getCompletionsInMockFile(
+            'const q = test.bla<number>()`abcdefg`',
+            { offset: 32, line: 1 }
+        ).then(server => {
+            const response = getFirstResponseOfType('completions', server);
+            assert.isTrue(response.success);
+            assert.strictEqual(response.body.length, 1);
+            assert.strictEqual(response.body[0].name, 'ab');
+            assert.strictEqual(response.body[0].kindModifiers, 'echo');
+        });
+    });
 });
 
 function getCompletionsInMockFile(contents, ...locations) {
