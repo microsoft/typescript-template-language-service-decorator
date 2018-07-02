@@ -9,13 +9,71 @@ import TemplateContext from './template-context';
 import TemplateSettings from './template-settings';
 import Logger from './logger';
 
+class PlaceholderSubstituter {
+    public static replacePlaceholders(
+        typescript: typeof ts,
+        settings: TemplateSettings,
+        node: ts.TemplateExpression | ts.NoSubstitutionTemplateLiteral
+    ): string {
+        const literalContents = node.getText().slice(1, -1);
+        if (node.kind === typescript.SyntaxKind.NoSubstitutionTemplateLiteral) {
+            return literalContents;
+        }
+
+        return PlaceholderSubstituter.getSubstitutions(
+            settings,
+            literalContents,
+            PlaceholderSubstituter.getPlaceholderSpans(node));
+    }
+
+    private static getPlaceholderSpans(node: ts.TemplateExpression) {
+        const spans: Array<{ start: number, end: number }> = [];
+        const stringStart = node.getStart() + 1;
+
+        let nodeStart = node.head.end - stringStart - 2;
+        for (const child of node.templateSpans.map(x => x.literal)) {
+            const start = child.getStart() - stringStart + 1;
+            spans.push({ start: nodeStart, end: start });
+            nodeStart = child.getEnd() - stringStart - 2;
+        }
+        return spans;
+    }
+
+    private static getSubstitutions(
+        settings: TemplateSettings,
+        contents: string,
+        locations: ReadonlyArray<{ start: number, end: number }>
+    ) {
+        if (settings.getSubstitutions) {
+            return settings.getSubstitutions(contents, locations);
+        }
+
+        for (const span of locations) {
+            contents = contents.substr(0, span.start) + this.getSubstitution(settings, contents, span.start, span.end) + contents.substr(span.end);
+        }
+
+        return contents;
+    }
+
+    private static getSubstitution(
+        settings: TemplateSettings,
+        templateString: string,
+        start: number,
+        end: number
+    ): string {
+        return settings.getSubstitution
+            ? settings.getSubstitution(templateString, start, end)
+            : 'x'.repeat(end - start);
+    }
+}
+
 class StandardTemplateContext implements TemplateContext {
     constructor(
         public readonly typescript: typeof ts,
         public readonly fileName: string,
         public readonly node: ts.TemplateLiteral,
         private readonly helper: ScriptSourceHelper,
-        private readonly templateStringSettings: TemplateSettings
+        private readonly templateSettings: TemplateSettings
     ) { }
 
     public toOffset(position: ts.LineAndCharacter): number {
@@ -39,30 +97,10 @@ class StandardTemplateContext implements TemplateContext {
     }
 
     public get text(): string {
-        const literalContents = this.node.getText().slice(1, -1);
-        if (this.node.kind === this.typescript.SyntaxKind.NoSubstitutionTemplateLiteral) {
-            return literalContents;
-        }
-
-        const stringStart = this.node.getStart() + 1;
-        let contents = literalContents;
-        let nodeStart = this.node.head.end - stringStart - 2;
-        for (const child of this.node.templateSpans.map(x => x.literal)) {
-            const start = child.getStart() - stringStart + 1;
-            contents = contents.substr(0, nodeStart) + this.getSubstitution(literalContents, nodeStart, start) + contents.substr(start);
-            nodeStart = child.getEnd() - stringStart - 2;
-        }
-        return contents;
-    }
-
-    private getSubstitution(
-        templateString: string,
-        start: number,
-        end: number
-    ): string {
-        return this.templateStringSettings.getSubstitution
-            ? this.templateStringSettings.getSubstitution(templateString, start, end)
-            : 'x'.repeat(end - start);
+        return PlaceholderSubstituter.replacePlaceholders(
+            this.typescript,
+            this.templateSettings,
+            this.node);
     }
 }
 

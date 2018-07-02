@@ -33,4 +33,19 @@ export default interface TemplateSettings {
         start: number,
         end: number
     ): string;
+
+    /**
+     * Retrieve a string that is used internally in place of the substitution expression.
+     * 
+     * If this is implemented, `getSubstitution` will not be called.
+     *
+     * @param templateString The raw template string with all `${substitution}` in place.
+     * @param spans List of placeholder spans.
+     * 
+     * @return Replacement string. Must be the exact same length as the input string
+     */
+    getSubstitutions?(
+        templateString: string,
+        spans: ReadonlyArray<{ start: number, end: number }>
+    ): string;
 }
