@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.0 - July 3, 2018
+- Added wrapper for `getOutliningSpans`.
+
 ## 1.5.0 - July 2, 2018
 - Added a `getSubstitutions` method on the settings. This method takes the raw template string
 and a list of all placeholder spans and returns the string with all placeholders removed. 
