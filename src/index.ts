@@ -22,7 +22,7 @@ export interface AdditionalConfiguration {
 }
 
 const nullLogger = new class NullLogger implements Logger {
-    public log(msg: string): void { }
+    public log(_msg: string): void { }
 }();
 
 /**
