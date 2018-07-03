@@ -32,7 +32,7 @@ describe('OutliningSpans', () => {
         assertPosition(span2.hintSpan.end, 1, 25);
     });
 
-    it('should return spans on multiple lines line', async () => {
+    it('should return spans on multiple lines', async () => {
         const spans = await getSpansInMockFile([
             'const q = test`',
             'a{bcd}e',
@@ -51,6 +51,32 @@ describe('OutliningSpans', () => {
         assertPosition(span2.textSpan.end, 3, 4);
         assertPosition(span2.hintSpan.start, 3, 2);
         assertPosition(span2.hintSpan.end, 3, 3);
+    });
+
+    it('should include TS spans', async () => {
+        const spans = await getSpansInMockFile([
+            '{',
+            'const q = test`',
+            'a{bcd}e',
+            '{f}g',
+            '`',
+            '}'
+        ].join('\n'));
+        assert.strictEqual(spans.length, 3);
+
+        const [tsSpan, span1, span2] = spans;
+        assertPosition(tsSpan.textSpan.start, 1, 1);
+        assertPosition(tsSpan.textSpan.end, 6, 2);
+
+        assertPosition(span1.textSpan.start, 3, 2);
+        assertPosition(span1.textSpan.end, 3, 7);
+        assertPosition(span1.hintSpan.start, 3, 3);
+        assertPosition(span1.hintSpan.end, 3, 6);
+
+        assertPosition(span2.textSpan.start, 4, 1);
+        assertPosition(span2.textSpan.end, 4, 4);
+        assertPosition(span2.hintSpan.start, 4, 2);
+        assertPosition(span2.hintSpan.end, 4, 3);
     });
 });
 
