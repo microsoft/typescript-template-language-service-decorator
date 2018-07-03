@@ -32,6 +32,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetCodeFixesAtPosition();
         this.tryAdaptGetSupportedCodeFixes();
         this.tryAdaptGetSignatureHelpItemsAtPosition();
+        this.tryAdaptGetOutliningSpans();
     }
 
     public decorate(languageService: ts.LanguageService) {
@@ -210,6 +211,26 @@ export default class TemplateLanguageServiceProxy {
         });
     }
 
+    private tryAdaptGetOutliningSpans() {
+        if (!this.templateStringService.getOutliningSpans) {
+            return;
+        }
+
+        this.wrap('getOutliningSpans', delegate => (fileName: string) => {
+            const templateSpans: ts.OutliningSpan[] = [];
+            for (const template of this.sourceHelper.getAllTemplates(fileName)) {
+                for (const span of this.templateStringService.getOutliningSpans!(template)) {
+                    templateSpans.push(this.translateOutliningSpan(template, span));
+                }
+            }
+
+            return [
+                ...delegate(fileName),
+                ...templateSpans,
+            ];
+        });
+    }
+
     private wrap<K extends keyof ts.LanguageService>(name: K, wrapper: LanguageServiceMethodWrapper<K>) {
         this._wrappers.push({ name, wrapper });
         return this;
@@ -236,10 +257,12 @@ export default class TemplateLanguageServiceProxy {
 
     private translateTextChange(
         context: TemplateContext,
-        textChangeInTemplate: ts.TextChange
+        textChange: ts.TextChange
     ): ts.TextChange {
-        textChangeInTemplate.span.start += context.node.getStart() + 1;
-        return textChangeInTemplate;
+        return {
+            ...textChange,
+            span: this.translateTextSpan(context, textChange.span),
+        };
     }
 
     private translateFileTextChange(
@@ -267,13 +290,30 @@ export default class TemplateLanguageServiceProxy {
         context: TemplateContext,
         signatureHelp: ts.SignatureHelpItems
     ): ts.SignatureHelpItems {
-        const applicableSpan = signatureHelp.applicableSpan;
         return {
             ...signatureHelp,
-            applicableSpan: {
-                start: context.node.getStart() + 1 + (applicableSpan.start || 0),
-                length: signatureHelp.applicableSpan.length,
-            },
+            applicableSpan: this.translateTextSpan(context, signatureHelp.applicableSpan),
+        };
+    }
+
+    private translateOutliningSpan(
+        context: TemplateContext,
+        span: ts.OutliningSpan
+    ): ts.OutliningSpan {
+        return {
+            ...span,
+            textSpan: this.translateTextSpan(context, span.textSpan),
+            hintSpan: this.translateTextSpan(context, span.hintSpan),
+        };
+    }
+
+    private translateTextSpan(
+        context: TemplateContext,
+        span: ts.TextSpan
+    ): ts.TextSpan {
+        return {
+            start: context.node.getStart() + 1 + span.start,
+            length: span.length,
         };
     }
 }
