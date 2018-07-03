@@ -53,8 +53,7 @@ export default interface TemplateLanguageService {
         position: ts.LineAndCharacter
     ): ts.SignatureHelpItems;
 
-    getOutliningSpans(
+    getOutliningSpans?(
         context: TemplateContext
     ): ts.OutliningSpan[];
-
 }

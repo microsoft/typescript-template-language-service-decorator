@@ -1,6 +1,9 @@
 # Changelog
 
-## 1.5.0 - July 3, 2018
+## 1.6.1 - July 3, 2018
+- `getOutliningSpans` should be optional like other wrappers.
+
+## 1.6.0 - July 3, 2018
 - Added wrapper for `getOutliningSpans`.
 
 ## 1.5.0 - July 2, 2018
