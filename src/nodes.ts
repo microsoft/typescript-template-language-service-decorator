@@ -4,6 +4,7 @@
 // Original code forked from https://github.com/Quramy/ts-graphql-plugin
 
 import * as ts from 'typescript/lib/tsserverlibrary';
+import { escapeRegExp } from './util/regexp';
 
 export function relative(from: ts.LineAndCharacter, to: ts.LineAndCharacter): ts.LineAndCharacter {
     return {
@@ -56,10 +57,6 @@ export function isTaggedLiteral(
     }
     const tagNode = node.parent as ts.TaggedTemplateExpression;
     return isTagged(tagNode, tags);
-}
-
-function escapeRegExp(string: string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 export function isTagged(node: ts.TaggedTemplateExpression, tags: ReadonlyArray<string>): boolean {
