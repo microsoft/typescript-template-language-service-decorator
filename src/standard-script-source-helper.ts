@@ -17,7 +17,7 @@ export default class StandardScriptSourceHelper implements ScriptSourceHelper {
         return s && findNode(this.typescript, s, position);
     }
 
-    public getAllNodes(fileName: string, cond: (n: ts.Node) => boolean) {
+    public getAllNodes(fileName: string, cond: (n: ts.Node) => boolean): ReadonlyArray<ts.Node> {
         const s = this.languageService.getProgram().getSourceFile(fileName);
         return s ? findAllNodes(this.typescript, s, cond) : [];
     }

@@ -7,7 +7,7 @@ export default interface ScriptSourceHelper {
     getAllNodes(
         fileName: string,
         condition: (n: Node) => boolean
-    ): ts.Node[];
+    ): ReadonlyArray<ts.Node>;
 
     getNode(
         fileName: string,

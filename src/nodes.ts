@@ -29,7 +29,7 @@ export function findAllNodes(
     typescript: typeof ts,
     sourceFile: ts.SourceFile,
     cond: (n: ts.Node) => boolean
-): ts.Node[] {
+): ReadonlyArray<ts.Node> {
     const result: ts.Node[] = [];
     function find(node: ts.Node) {
         if (cond(node)) {
