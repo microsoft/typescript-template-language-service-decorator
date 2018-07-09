@@ -46,7 +46,7 @@ export function findAllNodes(
 export function isTaggedLiteral(
     typescript: typeof ts,
     node: ts.NoSubstitutionTemplateLiteral,
-    tags: string[]
+    tags: ReadonlyArray<string>
 ): boolean {
     if (!node || !node.parent) {
         return false;
@@ -62,7 +62,7 @@ function escapeRegExp(string: string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export function isTagged(node: ts.TaggedTemplateExpression, tags: string[]): boolean {
+export function isTagged(node: ts.TaggedTemplateExpression, tags: ReadonlyArray<string>): boolean {
     const text = node.tag.getText();
     return tags.some(tag =>
         text === tag

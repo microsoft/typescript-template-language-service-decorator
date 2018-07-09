@@ -10,7 +10,7 @@ export default interface TemplateSettings {
      *
      * The tag string may be matched at either the start or the end of the template's tag.
      */
-    readonly tags: string[];
+    readonly tags: ReadonlyArray<string>;
 
     /**
      * Should templates with substitutions be processed?
