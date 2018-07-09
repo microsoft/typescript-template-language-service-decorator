@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.7.0 - July 9, 2018
+- Added `rawText` that returns the raw contents of a template literal.
+- Memoize some properties. 
+- Correctly mark some arrays as readonly in API.
+
 ## 1.6.1 - July 3, 2018
 - `getOutliningSpans` should be optional like other wrappers.
 
