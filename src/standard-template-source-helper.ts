@@ -8,6 +8,7 @@ import { isTaggedLiteral, isTagged, relative } from './nodes';
 import TemplateContext from './template-context';
 import TemplateSettings from './template-settings';
 import Logger from './logger';
+import { memoize } from './util/memoize';
 
 class PlaceholderSubstituter {
     public static replacePlaceholders(
@@ -92,19 +93,27 @@ class StandardTemplateContext implements TemplateContext {
         return relative(this.stringBodyPosition, docPosition);
     }
 
+    @memoize
     private get stringBodyOffset(): number {
         return this.node.getStart() + 1;
     }
 
+    @memoize
     private get stringBodyPosition(): ts.LineAndCharacter {
         return this.helper.getLineAndChar(this.fileName, this.stringBodyOffset);
     }
 
+    @memoize
     public get text(): string {
         return PlaceholderSubstituter.replacePlaceholders(
             this.typescript,
             this.templateSettings,
             this.node);
+    }
+
+    @memoize
+    public get rawText() {
+        return this.node.getText().slice(1, -1);
     }
 }
 
