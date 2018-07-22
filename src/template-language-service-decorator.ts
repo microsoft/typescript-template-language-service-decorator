@@ -14,12 +14,13 @@ type LanguageServiceMethodWrapper<K extends keyof ts.LanguageService>
 
 export default class TemplateLanguageServiceProxy {
 
-    private readonly _wrappers: any[] = [];
+    private readonly _wrappers: Array<{ name: keyof ts.LanguageService, wrapper: LanguageServiceMethodWrapper<any> }> = [];
 
     constructor(
         private readonly typescript: typeof ts,
         private readonly sourceHelper: TemplateSourceHelper,
         private readonly templateStringService: TemplateLanguageService,
+        // tslint:disable-next-line
         private readonly logger: Logger
     ) {
         this.tryAdaptGetCompletionsAtPosition();
@@ -30,12 +31,14 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetFormattingEditsForRange();
         this.tryAdaptGetCodeFixesAtPosition();
         this.tryAdaptGetSupportedCodeFixes();
+        this.tryAdaptGetSignatureHelpItemsAtPosition();
+        this.tryAdaptGetOutliningSpans();
     }
 
     public decorate(languageService: ts.LanguageService) {
         const ret: any = languageService;
         this._wrappers.forEach(({ name, wrapper }) => {
-            ret[name] = wrapper((languageService as any) [name]);
+            ret[name] = wrapper(languageService[name]);
         });
         return ret;
     }
@@ -47,7 +50,7 @@ export default class TemplateLanguageServiceProxy {
 
         const call = this.templateStringService.getSyntacticDiagnostics.bind(this.templateStringService);
         this.wrap('getSyntacticDiagnostics', delegate => (fileName: string) => {
-            return this.adaptDiagnosticsCall(delegate, call, fileName);
+            return this.adaptDiagnosticsCall(delegate, call, fileName) as ts.DiagnosticWithLocation[];
         });
     }
 
@@ -154,8 +157,8 @@ export default class TemplateLanguageServiceProxy {
             return;
         }
 
-        this.wrap('getCodeFixesAtPosition', delegate => (fileName: string, start: number, end: number, errorCodes: number[], options: ts.FormatCodeSettings) => {
-            const templateActions: ts.CodeAction[] = [];
+        this.wrap('getCodeFixesAtPosition', delegate => (fileName: string, start: number, end: number, errorCodes: ReadonlyArray<number>, options: ts.FormatCodeSettings, preferences: ts.UserPreferences) => {
+            const templateActions: ts.CodeFixAction[] = [];
             for (const template of this.sourceHelper.getAllTemplates(fileName)) {
                 const nodeStart = template.node.getStart() + 1;
                 const nodeEnd = template.node.getEnd() - 1;
@@ -171,7 +174,7 @@ export default class TemplateLanguageServiceProxy {
             }
 
             return [
-                ...delegate(fileName, start, end, errorCodes, options),
+                ...delegate(fileName, start, end, errorCodes, options, preferences),
                 ...templateActions,
             ];
         });
@@ -188,6 +191,44 @@ export default class TemplateLanguageServiceProxy {
                 ...this.templateStringService.getSupportedCodeFixes!(),
             ];
         };
+    }
+
+    private tryAdaptGetSignatureHelpItemsAtPosition() {
+        if (!this.templateStringService.getSignatureHelpItemsAtPosition) {
+            return;
+        }
+
+        this.wrap('getSignatureHelpItems', delegate => (fileName: string, position: number, ...rest: any[]) => {
+            const context = this.sourceHelper.getTemplate(fileName, position);
+            if (!context) {
+                return (delegate as any)(fileName, position, ...rest);
+            }
+
+            const signatureHelp = this.templateStringService.getSignatureHelpItemsAtPosition!(
+                context,
+                this.sourceHelper.getRelativePosition(context, position));
+            return signatureHelp ? this.translateSignatureHelpItems(context, signatureHelp) : undefined;
+        });
+    }
+
+    private tryAdaptGetOutliningSpans() {
+        if (!this.templateStringService.getOutliningSpans) {
+            return;
+        }
+
+        this.wrap('getOutliningSpans', delegate => (fileName: string) => {
+            const templateSpans: ts.OutliningSpan[] = [];
+            for (const template of this.sourceHelper.getAllTemplates(fileName)) {
+                for (const span of this.templateStringService.getOutliningSpans!(template)) {
+                    templateSpans.push(this.translateOutliningSpan(template, span));
+                }
+            }
+
+            return [
+                ...delegate(fileName),
+                ...templateSpans,
+            ];
+        });
     }
 
     private wrap<K extends keyof ts.LanguageService>(name: K, wrapper: LanguageServiceMethodWrapper<K>) {
@@ -216,10 +257,12 @@ export default class TemplateLanguageServiceProxy {
 
     private translateTextChange(
         context: TemplateContext,
-        textChangeInTemplate: ts.TextChange
+        textChange: ts.TextChange
     ): ts.TextChange {
-        textChangeInTemplate.span.start += context.node.getStart() + 1;
-        return textChangeInTemplate;
+        return {
+            ...textChange,
+            span: this.translateTextSpan(context, textChange.span),
+        };
     }
 
     private translateFileTextChange(
@@ -234,11 +277,43 @@ export default class TemplateLanguageServiceProxy {
 
     private translateCodeAction(
         context: TemplateContext,
-        action: ts.CodeAction
-    ): ts.CodeAction {
+        action: ts.CodeFixAction | ts.CodeAction
+    ): ts.CodeFixAction {
         return {
-            description: action.description,
+            ...action,
+            fixName: (action as ts.CodeFixAction).fixName || '',
             changes: action.changes.map(change => this.translateFileTextChange(context, change)),
+        };
+    }
+
+    private translateSignatureHelpItems(
+        context: TemplateContext,
+        signatureHelp: ts.SignatureHelpItems
+    ): ts.SignatureHelpItems {
+        return {
+            ...signatureHelp,
+            applicableSpan: this.translateTextSpan(context, signatureHelp.applicableSpan),
+        };
+    }
+
+    private translateOutliningSpan(
+        context: TemplateContext,
+        span: ts.OutliningSpan
+    ): ts.OutliningSpan {
+        return {
+            ...span,
+            textSpan: this.translateTextSpan(context, span.textSpan),
+            hintSpan: this.translateTextSpan(context, span.hintSpan),
+        };
+    }
+
+    private translateTextSpan(
+        context: TemplateContext,
+        span: ts.TextSpan
+    ): ts.TextSpan {
+        return {
+            start: context.node.getStart() + 1 + span.start,
+            length: span.length,
         };
     }
 }

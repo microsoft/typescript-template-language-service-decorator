@@ -3,13 +3,13 @@ const assert = require('chai').assert;
 
 const { assertRange } = require("../../_assert");
 const createServer = require('../../_server');
-const { openMockFile, getFirstResponseOfType, getResponsesOfType } = require('../../_helpers');
+const { openMockFile, getFirstResponseOfType } = require('../../_helpers');
 
 const mockFileName = 'main.ts';
 
 describe('CodeFixes', () => {
     it('should provide quick fixes for template string', () => {
-        const server = createServer(__dirname);
+        const server = createServer(__dirname, 'duplicate-fix');
         openMockFile(server, mockFileName, 'test`aexe`');
         server.send({
             command: 'getCodeFixes',

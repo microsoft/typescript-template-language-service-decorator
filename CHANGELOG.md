@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.7.0 - July 9, 2018
+- Added `rawText` that returns the raw contents of a template literal.
+- Memoize some properties. 
+- Correctly mark some arrays as readonly in API.
+
+## 1.6.1 - July 3, 2018
+- `getOutliningSpans` should be optional like other wrappers.
+
+## 1.6.0 - July 3, 2018
+- Added wrapper for `getOutliningSpans`.
+
+## 1.5.0 - July 2, 2018
+- Added a `getSubstitutions` method on the settings. This method takes the raw template string
+and a list of all placeholder spans and returns the string with all placeholders removed. 
+
+## 1.4.0 - July 2, 2018
+- Allow `getCodeFixesAtPosition` to return `CodeFixAction`.
+- Fixed templated tags not being detected.
+
+## 1.3.0 - June 29, 2018
+- Add wrapper for `getSignatureHelpItems`.
+
 ## 1.2.0 - February 12, 2018
 - Add wrapper for `getCodeFixesAtPosition`.
 

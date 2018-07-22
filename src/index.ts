@@ -22,7 +22,7 @@ export interface AdditionalConfiguration {
 }
 
 const nullLogger = new class NullLogger implements Logger {
-    public log(msg: string): void { }
+    public log(_msg: string): void { }
 }();
 
 /**
@@ -41,13 +41,15 @@ export function decorateWithTemplateLanguageService(
     templateSettings: TemplateSettings,
     additionalConfig?: AdditionalConfiguration
 ): ts.LanguageService {
+    const logger = (additionalConfig && additionalConfig.logger) || nullLogger;
     return new TemplateLanguageServiceDecorator(
         typescript,
         new StandardTemplateSourceHelper(
             typescript,
             templateSettings,
-            new StandardScriptSourceHelper(typescript, languageService)),
+            new StandardScriptSourceHelper(typescript, languageService),
+            logger),
         templateService,
-        (additionalConfig && additionalConfig.logger || nullLogger)
+        logger
     ).decorate(languageService);
 }

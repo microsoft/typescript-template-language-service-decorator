@@ -3,13 +3,13 @@ const path = require('path');
 const assert = require('chai').assert;
 
 const createServer = require('../../_server');
-const { openMockFile, getFirstResponseOfType, getResponsesOfType } = require('../../_helpers');
+const { openMockFile, getResponsesOfType } = require('../../_helpers');
 
 const mockFileName = 'main.ts';
 
 describe('CompletionEntryDetails', () => {
     it('should return details inside tagged, single line template', () => {
-        const server = createServer(__dirname);
+        const server = createServer(__dirname, 'echo-plugin');
         openMockFile(server, mockFileName, 'const q = test`abcdefg`');
         server.send({ command: 'completionEntryDetails', arguments: { file: mockFileName, offset: 17, line: 1, entryNames: ['a'] } });
         server.send({ command: 'completionEntryDetails', arguments: { file: mockFileName, offset: 18, line: 1, entryNames: ['b'] } });

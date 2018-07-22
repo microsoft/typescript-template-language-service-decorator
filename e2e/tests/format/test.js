@@ -1,17 +1,21 @@
 // @ts-check
 const assert = require('chai').assert;
 
-const { assertRange } = require("../../_assert");
+const { assertRange } = require('../../_assert');
 const createServer = require('../../_server');
-const { openMockFile, getFirstResponseOfType, getResponsesOfType } = require('../../_helpers');
+const { openMockFile, getFirstResponseOfType } = require('../../_helpers');
 
 const mockFileName = 'main.ts';
 
+const createServerWithMockFile = (fileContents) => {
+    const server = createServer(__dirname, 'split-plugin');
+    openMockFile(server, mockFileName, fileContents);
+    return server;
+}
 
 describe('Formatting', () => {
     it('should format template string', () => {
-        const server = createServer(__dirname);
-        openMockFile(server, mockFileName, 'test`abcd`');
+        const server = createServerWithMockFile('test`abcd`');
         server.send({
             command: 'format',
             arguments: {
@@ -39,8 +43,7 @@ describe('Formatting', () => {
     });
 
     it('should format range within template string', () => {
-        const server = createServer(__dirname);
-        openMockFile(server, mockFileName, 'test`abcdefg`');
+        const server = createServerWithMockFile('test`abcdefg`');
         server.send({
             command: 'format',
             arguments: {
@@ -66,8 +69,7 @@ describe('Formatting', () => {
 
 
     it('should format both javascript and template string contents', () => {
-        const server = createServer(__dirname);
-        openMockFile(server, mockFileName, ' test`abc`+""\n');
+        const server = createServerWithMockFile(' test`abc`+""\n');
         server.send({
             command: 'format',
             arguments: {
@@ -99,5 +101,4 @@ describe('Formatting', () => {
             assert.strictEqual(response.body[4].newText, '\n');
         });
     });
-
 });

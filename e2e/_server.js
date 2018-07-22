@@ -1,18 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+// @ts-check
+
+
 const { fork } = require('child_process');
 const path = require('path');
-const fs = require('fs');
 const readline = require('readline');
 
 class TSServer {
-    constructor(project) {
+    constructor(project, pluginName) {
         const logfile = path.join(__dirname, 'log.txt');
         const tsserverPath = path.join(__dirname, 'node_modules', 'typescript', 'lib', 'tsserver');
         const server = fork(tsserverPath, [
             '--logVerbosity', 'verbose',
-            '--logFile', logfile
+            '--logFile', logfile,
+            '--pluginProbeLocations', project,
+            '--globalPlugins', pluginName
         ], {
                 cwd: project,
                 stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
@@ -26,9 +30,13 @@ class TSServer {
             input: server.stdout
         }).on('line', line => {
             if (line[0] === '{') {
-                this.responses.push(JSON.parse(line));
+                try {
+                    this.responses.push(JSON.parse(line));
+                } catch (e) {
+                    // console.log(line);
+                }
             }
-        })
+        });
 
         this._isClosed = false;
         this._server = server;
@@ -37,6 +45,9 @@ class TSServer {
     }
 
     send(command) {
+        if (this._isClosed) {
+            throw new Error('Server closed');
+        }
         const seq = ++this._seq;
         const req = JSON.stringify(Object.assign({ seq: seq, type: 'request' }, command)) + '\n';
         this._server.stdin.write(req);
@@ -45,14 +56,14 @@ class TSServer {
     close() {
         if (!this._isClosed) {
             this._isClosed = true;
-            this._server.stdin.end();
+            setTimeout(() => this._server.stdin.end(), 200);
         }
         return this._exitPromise;
     }
 }
 
-function createServer(cwd) {
-    return new TSServer(cwd);
+function createServer(cwd, pluginName) {
+    return new TSServer(cwd, pluginName);
 }
 
 module.exports = createServer;

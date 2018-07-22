@@ -4,6 +4,7 @@
 // Original code forked from https://github.com/Quramy/ts-graphql-plugin
 
 import * as ts from 'typescript/lib/tsserverlibrary';
+import { escapeRegExp } from './util/regexp';
 
 export function relative(from: ts.LineAndCharacter, to: ts.LineAndCharacter): ts.LineAndCharacter {
     return {
@@ -29,7 +30,7 @@ export function findAllNodes(
     typescript: typeof ts,
     sourceFile: ts.SourceFile,
     cond: (n: ts.Node) => boolean
-): ts.Node[] {
+): ReadonlyArray<ts.Node> {
     const result: ts.Node[] = [];
     function find(node: ts.Node) {
         if (cond(node)) {
@@ -46,7 +47,7 @@ export function findAllNodes(
 export function isTaggedLiteral(
     typescript: typeof ts,
     node: ts.NoSubstitutionTemplateLiteral,
-    tags: string[]
+    tags: ReadonlyArray<string>
 ): boolean {
     if (!node || !node.parent) {
         return false;
@@ -58,16 +59,15 @@ export function isTaggedLiteral(
     return isTagged(tagNode, tags);
 }
 
-function escapeRegExp(string: string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-export function isTagged(node: ts.TaggedTemplateExpression, tags: string[]): boolean {
+export function isTagged(node: ts.TaggedTemplateExpression, tags: ReadonlyArray<string>): boolean {
     const text = node.tag.getText();
     return tags.some(tag =>
         text === tag
         || new RegExp(`$${escapeRegExp(tag)}\s*^`).test(text)
         || text.startsWith(tag + '.')
         || text.endsWith('.' + tag)
-        || text.startsWith(tag + '('));
+        || text.startsWith(tag + '(')
+        || text.startsWith(tag + '<')
+        || text.startsWith(tag + '[')
+    );
 }

@@ -17,18 +17,18 @@ export default class StandardScriptSourceHelper implements ScriptSourceHelper {
         return s && findNode(this.typescript, s, position);
     }
 
-    public getAllNodes(fileName: string, cond: (n: ts.Node) => boolean) {
+    public getAllNodes(fileName: string, cond: (n: ts.Node) => boolean): ReadonlyArray<ts.Node> {
         const s = this.languageService.getProgram().getSourceFile(fileName);
         return s ? findAllNodes(this.typescript, s, cond) : [];
     }
 
     public getLineAndChar(fileName: string, position: number): ts.LineAndCharacter {
         const s = this.languageService.getProgram().getSourceFile(fileName);
-        return this.typescript.getLineAndCharacterOfPosition(s, position);
+        return this.typescript.getLineAndCharacterOfPosition(s!, position);
     }
 
     public getOffset(fileName: string, line: number, character: number) {
         const s = this.languageService.getProgram().getSourceFile(fileName);
-        return this.typescript.getPositionOfLineAndCharacter(s, line, character);
+        return this.typescript.getPositionOfLineAndCharacter(s!, line, character);
     }
 }
