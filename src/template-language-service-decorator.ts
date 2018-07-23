@@ -196,7 +196,7 @@ export default class TemplateLanguageServiceProxy {
 
     private tryAdaptGetDefinitionAtPosition() {
         if (!this.templateStringService.getDefinitionAtPosition) {
-            return
+            return;
         }
 
         this.wrap('getDefinitionAtPosition', delegate => (fileName: string, position: number, ...rest: any[]) => {
@@ -207,9 +207,9 @@ export default class TemplateLanguageServiceProxy {
 
             return this.templateStringService.getDefinitionAtPosition!(
                 context,
-                this.sourceHelper.getRelativePosition(context, position))
-            )
-        });
+                this.sourceHelper.getRelativePosition(context, position));
+            );
+        })
     }
 
     private tryAdaptGetSignatureHelpItemsAtPosition() {
