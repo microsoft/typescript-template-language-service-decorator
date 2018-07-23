@@ -31,6 +31,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetFormattingEditsForRange();
         this.tryAdaptGetCodeFixesAtPosition();
         this.tryAdaptGetSupportedCodeFixes();
+        this.tryAdaptGetDefinitionAtPosition();
         this.tryAdaptGetSignatureHelpItemsAtPosition();
         this.tryAdaptGetOutliningSpans();
     }
@@ -191,6 +192,24 @@ export default class TemplateLanguageServiceProxy {
                 ...this.templateStringService.getSupportedCodeFixes!(),
             ];
         };
+    }
+
+    private tryAdaptGetDefinitionAtPosition() {
+        if (!this.templateStringService.getDefinitionAtPosition) {
+            return
+        }
+
+        this.wrap('getDefinitionAtPosition', delegate => (fileName: string, position: number, ...rest: any[]) => {
+            const context = this.sourceHelper.getTemplate(fileName, position);
+            if (!context) {
+                return (delegate as any)(fileName, position, ...rest);
+            }
+
+            return this.templateStringService.getDefinitionAtPosition!(
+                context,
+                this.sourceHelper.getRelativePosition(context, position))
+            )
+        });
     }
 
     private tryAdaptGetSignatureHelpItemsAtPosition() {
