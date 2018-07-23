@@ -47,7 +47,7 @@ export default interface TemplateLanguageService {
         errorCodes: ReadonlyArray<number>,
         formatOptions: ts.FormatCodeSettings
     ): Array<ts.CodeAction | ts.CodeFixAction>;
-    
+
     getDefinitionAtPosition?(
         context: TemplateContext,
         position: ts.LineAndCharacter
