@@ -208,8 +208,7 @@ export default class TemplateLanguageServiceProxy {
             return this.templateStringService.getDefinitionAtPosition!(
                 context,
                 this.sourceHelper.getRelativePosition(context, position));
-            );
-        })
+        });
     }
 
     private tryAdaptGetSignatureHelpItemsAtPosition() {
