@@ -27,12 +27,12 @@ describe('GetDefinitionAtPosition', () => {
 
     it('should return definition at position', async () => {
         return getDefinitionAtPositionInMockFile(
-            `const a = 'test';
-console.log(a);`,
-            { offset: 12, line: 1 },
+            `const abc = 'test';
+console.log(abc);`,
+            { offset: 13, line: 2 },
         ).then(server => {
             const definitions = getResponsesOfType('goToDefinition', server);
-            // TODO: Fix this test, it should return location of a
+            // TODO: Fix this test, it should return location of abc
             assert.strictEqual(definitions.length, 0);
         })
     });
