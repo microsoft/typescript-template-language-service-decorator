@@ -163,7 +163,7 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
 
     public getAllTemplates(
         fileName: string
-    ): TemplateContext[] {
+    ): ReadonlyArray<TemplateContext> {
         const out: TemplateContext[] = [];
         for (const node of this.helper.getAllNodes(fileName, n => this.getValidTemplateNode(this.templateStringSettings, n) !== undefined)) {
             const validNode = this.getValidTemplateNode(this.templateStringSettings, node);

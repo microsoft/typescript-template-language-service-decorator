@@ -11,7 +11,7 @@ export default interface TemplateSourceHelper {
 
     getAllTemplates(
         fileName: string
-    ): TemplateContext[];
+    ): ReadonlyArray<TemplateContext>;
 
     getRelativePosition(
         context: TemplateContext,
