@@ -36,11 +36,10 @@ export default class TemplateLanguageServiceProxy {
     }
 
     public decorate(languageService: ts.LanguageService) {
-        const ret: any = languageService;
         this._wrappers.forEach(({ name, wrapper }) => {
-            ret[name] = wrapper(languageService[name]);
+            languageService[name] = wrapper(languageService[name]!.bind(languageService));
         });
-        return ret;
+        return languageService;
     }
 
     private tryAdaptGetSyntaxDiagnostics() {
