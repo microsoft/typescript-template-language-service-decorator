@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.1 - July 25, 2018
+- Make sure correct `this` is bound for delegate calls.
+
 ## 1.7.0 - July 9, 2018
 - Added `rawText` that returns the raw contents of a template literal.
 - Memoize some properties. 
