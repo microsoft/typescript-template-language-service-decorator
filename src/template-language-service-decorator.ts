@@ -243,12 +243,11 @@ export default class TemplateLanguageServiceProxy {
         const baseDiagnostics = delegate(fileName);
         const templateDiagnostics: ts.Diagnostic[] = [];
         for (const context of this.sourceHelper.getAllTemplates(fileName)) {
-            const diagnostics: ts.Diagnostic[] = implementation(context);
-
-            for (const diagnostic of diagnostics) {
-                templateDiagnostics.push(Object.assign({}, diagnostic, {
+            for (const diagnostic of implementation(context)) {
+                templateDiagnostics.push({
+                    ...diagnostic,
                     start: context.node.getStart() + 1 + (diagnostic.start || 0),
-                }));
+                });
             }
         }
         return [...baseDiagnostics, ...templateDiagnostics];
