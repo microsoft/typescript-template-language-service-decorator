@@ -49,6 +49,7 @@ export = (mod: { typescript: typeof ts }) => {
             return decorateWithTemplateLanguageService(
                 mod.typescript,
                 info.languageService,
+                info.project,
                 new EchoTemplateLanguageService(),
                 { tags: ['echo'] });
         }

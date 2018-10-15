@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.0 - October 15, 2018
+- Require project object to be passed to top level api.
+
 ## 1.7.1 - July 25, 2018
 - Make sure correct `this` is bound for delegate calls.
 
