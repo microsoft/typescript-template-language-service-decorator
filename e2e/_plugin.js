@@ -6,7 +6,7 @@
 const template = require('../lib/index');
 
 /**
- * @param {function(): template.TemplateLanguageService} createTemplateLanguageService
+ * @param {function(any, any): template.TemplateLanguageService} createTemplateLanguageService
  * @param {template.TemplateStringSettings} settings
  */
 module.exports = (createTemplateLanguageService, settings) => {
@@ -18,6 +18,7 @@ module.exports = (createTemplateLanguageService, settings) => {
             return template.decorateWithTemplateLanguageService(
                 mod.typescript,
                 info.languageService,
+                info.project,
                 adapter,
                 settings,
                 { logger: { log }  });

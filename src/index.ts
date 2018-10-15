@@ -37,6 +37,7 @@ const nullLogger = new class NullLogger implements Logger {
 export function decorateWithTemplateLanguageService(
     typescript: typeof ts,
     languageService: ts.LanguageService,
+    project: ts.server.Project,
     templateService: TemplateLanguageService,
     templateSettings: TemplateSettings,
     additionalConfig?: AdditionalConfiguration
@@ -47,7 +48,7 @@ export function decorateWithTemplateLanguageService(
         new StandardTemplateSourceHelper(
             typescript,
             templateSettings,
-            new StandardScriptSourceHelper(typescript, languageService),
+            new StandardScriptSourceHelper(typescript, project),
             logger),
         templateService,
         logger

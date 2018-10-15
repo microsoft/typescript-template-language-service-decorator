@@ -101,4 +101,65 @@ describe('Formatting', () => {
             assert.strictEqual(response.body[4].newText, '\n');
         });
     });
+
+    it('should not cause TS server to become out of sync', () => {
+        const server = createServerWithMockFile('var token;class c { fileConfigManager:any;\r\n\tpublic execute() {\r\n\r\n\t\tconsole.log(\"in execute\");\r\n\t}\r\n}');
+        server.send({
+            command: 'change',
+            arguments: {
+                insertString: "\t\t\t\tthis.fileConfigManager.ensureConfigurationForDocument(document, token);\r\n",
+                file: mockFileName,
+                line: 3,
+                offset: 1,
+                endLine: 3,
+                endOffset: 1
+            }
+        });
+        server.send({
+            command: "format",
+            arguments: {
+                file: mockFileName,
+                line: 3,
+                offset: 1,
+                endLine: 4,
+                endOffset: 1
+            }
+        });
+        server.send({
+            command: "change",
+            arguments: {
+                insertString: "",
+                file: mockFileName,
+                line: 3,
+                offset: 3,
+                endLine: 3,
+                endOffset: 5
+            }
+        });
+        server.send({
+            command: 'syntacticDiagnosticsSync',
+            arguments: {
+                file: mockFileName
+            }
+        });
+        server.send({
+            command: 'semanticDiagnosticsSync',
+            arguments: {
+                file: mockFileName
+            }
+        });
+
+        return server.close().then(() => {
+            {
+                const response = getFirstResponseOfType('syntacticDiagnosticsSync', server);
+                assert.isTrue(response.success);
+                assert.strictEqual(response.body.length, 0);
+            }
+            {
+                const response = getFirstResponseOfType('semanticDiagnosticsSync', server);
+                assert.isTrue(response.success);
+                assert.strictEqual(response.body.length, 0);
+            }
+        });
+    });
 });
