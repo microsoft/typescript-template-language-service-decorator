@@ -31,6 +31,7 @@ const nullLogger = new class NullLogger implements Logger {
  *
  * @param languageService Base language service to augment.
  * @param templateService Language service for contents of template strings.
+ * @param project Language service for contents of template strings.
  * @param templateSettings Determines how template strings are processed
  * @param additionalConfig Additional configuration for the service
  */
