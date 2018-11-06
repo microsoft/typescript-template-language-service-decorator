@@ -69,7 +69,7 @@ export default class TemplateLanguageServiceProxy {
             return;
         }
 
-        this.wrap('getQuickInfoAtPosition', delegate => (fileName: string, position: number): ts.QuickInfo => {
+        this.wrap('getQuickInfoAtPosition', delegate => (fileName: string, position: number): ts.QuickInfo | undefined => {
             const context = this.sourceHelper.getTemplate(fileName, position);
             if (!context) {
                 return delegate(fileName, position);
