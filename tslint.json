@@ -25,15 +25,10 @@
     "member-access": [
       true
     ],
-    "max-classes-per-file": [
-      false
-    ],
+    "max-classes-per-file": false,
     "no-empty": false,
     "object-literal-sort-keys": false,
     "no-unused-expression": true,
-    "no-unused-variable": [
-      true
-    ],
     "arrow-parens": [
       true,
       "ban-single-arg-parens"
@@ -62,7 +57,7 @@
         }
       }
     ],
-    "max-line-length": false,
+    "max-line-length": false
   },
   "rulesDirectory": [],
   "linterOptions": {
