@@ -48,6 +48,11 @@ export default interface TemplateLanguageService {
         formatOptions: ts.FormatCodeSettings
     ): Array<ts.CodeAction | ts.CodeFixAction>;
 
+    getDefinitionAtPosition?(
+        context: TemplateContext,
+        position: ts.LineAndCharacter
+    ): ts.DefinitionInfo[];
+
     getSignatureHelpItemsAtPosition?(
         context: TemplateContext,
         position: ts.LineAndCharacter
