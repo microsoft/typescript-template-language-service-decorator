@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0 - November 12, 2018
+- Added wrapper for `getDefinitionAtPosition`. Thanks @divyenduz!
+- Added wrapper for `getReferencesAtPosition`.
+
 ## 2.0.0 - October 15, 2018
 - Require project object to be passed to top level api.
 
@@ -34,13 +38,13 @@ and a list of all placeholder spans and returns the string with all placeholders
 ## 1.1.0 - January 9, 2018
 - Add wrapper for `completionEntryDetails`.
 
-## 1.0.2 - Novermber 29, 2017
+## 1.0.2 - November 29, 2017
 - Fix completion provider for TS 2.6.2 API changes.
 
-## 1.0.1 - Novermber 9, 2017
-- Do not require a peer depdency on TypeScript.
+## 1.0.1 - November 9, 2017
+- Do not require a peer dependency on TypeScript.
 
-## 1.0.0 - Novermber 9, 2017
+## 1.0.0 - November 9, 2017
 - Do not take runtime dependency on TypeScript.
 
 ## 0.1.3
