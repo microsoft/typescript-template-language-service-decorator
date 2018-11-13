@@ -56,7 +56,7 @@ export default interface TemplateLanguageService {
     getSignatureHelpItemsAtPosition?(
         context: TemplateContext,
         position: ts.LineAndCharacter
-    ): ts.SignatureHelpItems;
+    ): ts.SignatureHelpItems | undefined;
 
     getOutliningSpans?(
         context: TemplateContext
