@@ -14,18 +14,22 @@ const createServerWithMockFile = (fileContents) => {
 };
 
 describe('GetDefinitionAtPosition', () => {
-    it('should return blank definition at template literal position', async () => {
-        return getDefinitionAtPositionInMockFile(
+    it('aaa should return blank definition at template literal position', async () => {
+        return getDefinitionAtPositionInMockFile([
+            '',
             'const q = test`abcdefg`',
-            { offset: 16, line: 1 },
+        ].join('\n'),
+            { offset: 16, line: 2 },
         ).then(server => {
             const definitions = getFirstResponseOfType('definition', server).body;
-            // Default goToDefinition inside tagged template literal should be blank
-            assert.strictEqual(definitions.length, 0);
+            assert.strictEqual(definitions.length, 1);
+
+            const [def] = definitions;
+            assert.deepEqual(def, { "file": mockFileName, "start": { "line": 2, "offset": 16 }, "end": { "line": 2, "offset": 17 } });
         });
     });
 
-    it('should return definition at position', async () => {
+    it('should still return js/ts definitions at position', async () => {
         return getDefinitionAtPositionInMockFile(
             `const abc = 'test';
 console.log(abc);`,
@@ -33,7 +37,7 @@ console.log(abc);`,
         ).then(server => {
             const definitions = getFirstResponseOfType('definition', server).body;
             assert.strictEqual(definitions.length, 1);
-            
+
             const [def] = definitions;
             assert.deepEqual(def, { "file": mockFileName, "start": { "line": 1, "offset": 7 }, "end": { "line": 1, "offset": 10 } });
         });

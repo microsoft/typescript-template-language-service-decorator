@@ -202,13 +202,17 @@ export default class TemplateLanguageServiceProxy {
 
         this.wrap('getDefinitionAtPosition', delegate => (fileName: string, position: number, ...rest: any[]) => {
             const context = this.sourceHelper.getTemplate(fileName, position);
-            if (!context) {
-                return (delegate as any)(fileName, position, ...rest);
+            if (context) {
+                const definition = this.templateStringService.getDefinitionAtPosition!(
+                    context,
+                    this.sourceHelper.getRelativePosition(context, position));
+
+                if (definition) {
+                    return definition.map(def => this.translateDefinitionInfo(context, def));
+                }
             }
 
-            return this.templateStringService.getDefinitionAtPosition!(
-                context,
-                this.sourceHelper.getRelativePosition(context, position));
+            return (delegate as any)(fileName, position, ...rest);
         });
     }
 
@@ -352,6 +356,17 @@ export default class TemplateLanguageServiceProxy {
         return {
             start: context.node.getStart() + 1 + span.start,
             length: span.length,
+        };
+    }
+
+    private translateDefinitionInfo(
+        context: TemplateContext,
+        definition: ts.DefinitionInfo
+    ): ts.DefinitionInfo {
+        return {
+           ...definition,
+           fileName: context.fileName,
+           textSpan: this.translateTextSpan(context, definition.textSpan),
         };
     }
 }
