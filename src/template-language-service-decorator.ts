@@ -208,9 +208,9 @@ export default class TemplateLanguageServiceProxy {
                     context,
                     this.sourceHelper.getRelativePosition(context, position));
 
-                if (definition) {
-                    return definition.map(def => this.translateDefinitionInfo(context, def));
-                }
+                return definition
+                    ? definition.map(def => this.translateDefinitionInfo(context, def))
+                    : undefined;
             }
 
             return (delegate as any)(fileName, position, ...rest);
@@ -267,9 +267,9 @@ export default class TemplateLanguageServiceProxy {
                     context,
                     this.sourceHelper.getRelativePosition(context, position));
 
-                if (references) {
-                    return references.map(ref => this.translateReferenceEntry(context, ref));
-                }
+                return references
+                    ? references.map(ref => this.translateReferenceEntry(context, ref))
+                    : undefined;
             }
 
             return (delegate as any)(fileName, position, ...rest);
