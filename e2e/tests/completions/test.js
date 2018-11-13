@@ -35,7 +35,9 @@ describe('Completions', () => {
     });
 
     it('should not return completions before tagged template', async () => {
-        const server = await getCompletionsInMockFile('const q = test`abcdefg`', { offset: 1, line: 1 }, { offset: 15, line: 1 });
+        const server = await getCompletionsInMockFile('const q = test`abcdefg`',
+            { offset: 1, line: 1 },
+            { offset: 15, line: 1 });
         const completionsResponses = getResponsesOfType('completions', server);
         for (const response of completionsResponses) {
             assert.isTrue(response.success);
@@ -44,7 +46,8 @@ describe('Completions', () => {
     });
 
     it('should return completions for template tag ending with tag name', async () => {
-        const server = await getCompletionsInMockFile('const q = this.is().a.test`abcdefg`', { offset: 30, line: 1 });
+        const server = await getCompletionsInMockFile('const q = this.is().a.test`abcdefg`',
+            { offset: 30, line: 1 });
         const response = getFirstResponseOfType('completions', server);
         assert.isTrue(response.success);
         assert.strictEqual(response.body.length, 1);
@@ -139,15 +142,32 @@ describe('Completions', () => {
         assert.strictEqual(response.body[0].name, 'ab');
         assert.strictEqual(response.body[0].kindModifiers, 'echo');
     });
+
+    it('should translate replacementSpan', async () => {
+        const server = await getCompletionsInMockFile(
+            [
+                "",
+                "const q = test`abcdefg`"
+            ].join('\n'),
+            { offset: 18, line: 2 }
+        );
+        const response = getFirstResponseOfType('completions', server);
+        assert.isTrue(response.success);
+        assert.strictEqual(response.body.length, 1);
+        assert.strictEqual(response.body[0].name, 'ab');
+        assert.strictEqual(response.body[0].kindModifiers, 'echo');
+        assert.strictEqual(response.body[0].replacementSpan.start.line, 2);
+        assert.strictEqual(response.body[0].replacementSpan.start.offset, 16);
+    });
 });
 
-    async function getCompletionsInMockFile(contents, ...locations) {
-        const server = createServerWithMockFile(contents);
+async function getCompletionsInMockFile(contents, ...locations) {
+    const server = createServerWithMockFile(contents);
 
-        for (const location of locations) {
-            server.send({ command: 'completions', arguments: { file: mockFileName, ...location } });
-        }
-
-        await server.close();
-        return server;
+    for (const location of locations) {
+        server.send({ command: 'completions', arguments: { file: mockFileName, ...location } });
     }
+
+    await server.close();
+    return server;
+}

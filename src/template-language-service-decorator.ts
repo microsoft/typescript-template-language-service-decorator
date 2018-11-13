@@ -100,9 +100,11 @@ export default class TemplateLanguageServiceProxy {
                 return (delegate as any)(fileName, position, ...rest);
             }
 
-            return this.templateStringService.getCompletionsAtPosition!(
+            return this.translateCompletionInfo(
                 context,
-                this.sourceHelper.getRelativePosition(context, position));
+                this.templateStringService.getCompletionsAtPosition!(
+                    context,
+                    this.sourceHelper.getRelativePosition(context, position)));
         });
     }
 
@@ -269,6 +271,26 @@ export default class TemplateLanguageServiceProxy {
             }
         }
         return [...baseDiagnostics, ...templateDiagnostics];
+    }
+
+    private translateCompletionInfo(
+        context: TemplateContext,
+        info: ts.CompletionInfo
+    ): ts.CompletionInfo {
+        return {
+            ...info,
+            entries: info.entries.map(entry => this.translateCompletionEntry(context, entry)),
+        };
+    }
+
+    private translateCompletionEntry(
+        context: TemplateContext,
+        entry: ts.CompletionEntry
+    ): ts.CompletionEntry {
+        return {
+            ...entry,
+            replacementSpan: entry.replacementSpan ? this.translateTextSpan(context, entry.replacementSpan) : undefined,
+        };
     }
 
     private translateTextChange(
