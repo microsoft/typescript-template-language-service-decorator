@@ -122,7 +122,7 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
         private readonly typescript: typeof ts,
         private readonly templateStringSettings: TemplateSettings,
         private readonly helper: ScriptSourceHelper,
-        private readonly logger: Logger // tslint:disable-line
+        _logger: Logger
     ) { }
 
     public getTemplate(

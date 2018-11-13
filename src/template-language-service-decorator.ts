@@ -20,8 +20,7 @@ export default class TemplateLanguageServiceProxy {
         private readonly typescript: typeof ts,
         private readonly sourceHelper: TemplateSourceHelper,
         private readonly templateStringService: TemplateLanguageService,
-        // tslint:disable-next-line
-        private readonly logger: Logger
+        _logger: Logger
     ) {
         this.tryAdaptGetCompletionsAtPosition();
         this.tryAdaptGetCompletionEntryDetails();
