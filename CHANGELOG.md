@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.1 - November 12, 2018
+- Fix `getReferencesAtPosition` not being marked as optional.
+
 ## 2.1.0 - November 12, 2018
 - Added wrapper for `getDefinitionAtPosition`. Thanks @divyenduz!
 - Added wrapper for `getReferencesAtPosition`.
