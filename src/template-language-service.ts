@@ -62,7 +62,7 @@ export default interface TemplateLanguageService {
         context: TemplateContext
     ): ts.OutliningSpan[];
 
-    getReferencesAtPosition(
+    getReferencesAtPosition?(
         context: TemplateContext,
         position: ts.LineAndCharacter
     ): ts.ReferenceEntry[] | undefined;
