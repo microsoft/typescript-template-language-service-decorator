@@ -34,6 +34,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetDefinitionAtPosition();
         this.tryAdaptGetSignatureHelpItemsAtPosition();
         this.tryAdaptGetOutliningSpans();
+        this.tryAdaptGetReferencesAtPosition();
     }
 
     public decorate(languageService: ts.LanguageService) {
@@ -254,6 +255,27 @@ export default class TemplateLanguageServiceProxy {
         });
     }
 
+    private tryAdaptGetReferencesAtPosition() {
+        if (!this.templateStringService.getReferencesAtPosition) {
+            return;
+        }
+
+        this.wrap('getReferencesAtPosition', delegate => (fileName: string, position: number, ...rest: any[]) => {
+            const context = this.sourceHelper.getTemplate(fileName, position);
+            if (context) {
+                const references = this.templateStringService.getReferencesAtPosition!(
+                    context,
+                    this.sourceHelper.getRelativePosition(context, position));
+
+                if (references) {
+                    return references.map(ref => this.translateReferenceEntry(context, ref));
+                }
+            }
+
+            return (delegate as any)(fileName, position, ...rest);
+        });
+    }
+
     private wrap<K extends keyof ts.LanguageService>(name: K, wrapper: LanguageServiceMethodWrapper<K>) {
         this._wrappers.push({ name, wrapper });
         return this;
@@ -364,9 +386,20 @@ export default class TemplateLanguageServiceProxy {
         definition: ts.DefinitionInfo
     ): ts.DefinitionInfo {
         return {
-           ...definition,
-           fileName: context.fileName,
-           textSpan: this.translateTextSpan(context, definition.textSpan),
+            ...definition,
+            fileName: context.fileName,
+            textSpan: this.translateTextSpan(context, definition.textSpan),
+        };
+    }
+
+    private translateReferenceEntry(
+        context: TemplateContext,
+        entry: ts.ReferenceEntry
+    ): ts.ReferenceEntry {
+        return {
+            ...entry,
+            fileName: context.fileName,
+            textSpan: this.translateTextSpan(context, entry.textSpan),
         };
     }
 }

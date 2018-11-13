@@ -61,4 +61,9 @@ export default interface TemplateLanguageService {
     getOutliningSpans?(
         context: TemplateContext
     ): ts.OutliningSpan[];
+
+    getReferencesAtPosition(
+        context: TemplateContext,
+        position: ts.LineAndCharacter
+    ): ts.ReferenceEntry[] | undefined;
 }
