@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.2 - November 13, 2018
+- Fix signature help not annotating that you can return `undefined`.
+- For `definitions` and `references`, don't delegate back to language service is plugin provides a empty response.
+
 ## 2.1.1 - November 12, 2018
 - Fix `getReferencesAtPosition` not being marked as optional.
 
