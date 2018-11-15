@@ -14,33 +14,27 @@ const createServerWithMockFile = (fileContents) => {
 };
 
 describe('GetDefinitionAtPosition', () => {
-    it('aaa should return blank definition at template literal position', async () => {
-        return getDefinitionAtPositionInMockFile([
+    it('should return blank definition at template literal position', async () => {
+        const server = await getDefinitionAtPositionInMockFile([
             '',
             'const q = test`abcdefg`',
-        ].join('\n'),
-            { offset: 16, line: 2 },
-        ).then(server => {
-            const definitions = getFirstResponseOfType('definition', server).body;
-            assert.strictEqual(definitions.length, 1);
+        ].join('\n'), { offset: 16, line: 2 });
 
-            const [def] = definitions;
-            assert.deepEqual(def, { "file": mockFileName, "start": { "line": 2, "offset": 16 }, "end": { "line": 2, "offset": 17 } });
-        });
+        const definitions = getFirstResponseOfType('definition', server).body;
+        assert.strictEqual(definitions.length, 1);
+        const [def] = definitions;
+        assert.deepEqual(def, { "file": mockFileName, "start": { "line": 2, "offset": 16 }, "end": { "line": 2, "offset": 17 } });
     });
 
     it('should still return js/ts definitions at position', async () => {
-        return getDefinitionAtPositionInMockFile(
-            `const abc = 'test';
-console.log(abc);`,
-            { offset: 13, line: 2 },
-        ).then(server => {
-            const definitions = getFirstResponseOfType('definition', server).body;
-            assert.strictEqual(definitions.length, 1);
+        const server = await getDefinitionAtPositionInMockFile(
+            `const abc = 'test';\nconsole.log(abc);`,
+            { offset: 13, line: 2 });
 
-            const [def] = definitions;
-            assert.deepEqual(def, { "file": mockFileName, "start": { "line": 1, "offset": 7 }, "end": { "line": 1, "offset": 10 } });
-        });
+        const definitions = getFirstResponseOfType('definition', server).body;
+        assert.strictEqual(definitions.length, 1);
+        const [def] = definitions;
+        assert.deepEqual(def, { "file": mockFileName, "start": { "line": 1, "offset": 7 }, "end": { "line": 1, "offset": 10 } });
     });
 });
 
