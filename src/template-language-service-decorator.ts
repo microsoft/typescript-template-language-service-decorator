@@ -259,16 +259,29 @@ export default class TemplateLanguageServiceProxy {
             return;
         }
 
-        this.wrap('getReferencesAtPosition', delegate => (fileName: string, position: number, ...rest: any[]) => {
+        this.wrap('findReferences', delegate => (fileName: string, position: number, ...rest: any[]): ts.ReferencedSymbol[] | undefined => {
             const context = this.sourceHelper.getTemplate(fileName, position);
             if (context) {
                 const references = this.templateStringService.getReferencesAtPosition!(
                     context,
                     this.sourceHelper.getRelativePosition(context, position));
 
-                return references
-                    ? references.map(ref => this.translateReferenceEntry(context, ref))
-                    : undefined;
+                if (references) {
+                    return [{
+                        definition: {
+                            containerKind: this.typescript.ScriptElementKind.string,
+                            containerName: '',
+                            displayParts: [],
+                            fileName,
+                            kind: this.typescript.ScriptElementKind.string,
+                            name: '',
+                            textSpan: { start: position, length: 0 },
+                        },
+                        references: references.map(ref => this.translateReferenceEntry(context, ref)),
+                    }];
+                }
+
+                return undefined;
             }
 
             return (delegate as any)(fileName, position, ...rest);
