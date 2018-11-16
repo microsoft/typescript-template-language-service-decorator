@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.3 - November 15, 2018
+- Fix `getReferencesAtPosition` not being called when using TS 3.1+.
+
 ## 2.1.2 - November 13, 2018
 - Fix signature help not annotating that you can return `undefined`.
 - For `definitions` and `references`, don't delegate back to language service is plugin provides a empty response.
