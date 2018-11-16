@@ -34,6 +34,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetSignatureHelpItemsAtPosition();
         this.tryAdaptGetOutliningSpans();
         this.tryAdaptGetReferencesAtPosition();
+        this.tryAdaptGetJsxClosingTagAtPosition();
     }
 
     public decorate(languageService: ts.LanguageService) {
@@ -289,6 +290,27 @@ export default class TemplateLanguageServiceProxy {
                 }
 
                 return undefined;
+            }
+
+            return (delegate as any)(fileName, position, ...rest);
+        });
+    }
+
+    private tryAdaptGetJsxClosingTagAtPosition() {
+        if (!this.templateStringService.getJsxClosingTagAtPosition) {
+            return;
+        }
+
+        this.wrap('getJsxClosingTagAtPosition', delegate => (fileName: string, position: number, ...rest: any[]): ts.JsxClosingTagInfo | undefined => {
+            const context = this.sourceHelper.getTemplate(fileName, position);
+            if (context) {
+                const closing = this.templateStringService.getJsxClosingTagAtPosition!(
+                    context,
+                    this.sourceHelper.getRelativePosition(context, position));
+
+                if (closing) {
+                    return closing;
+                }
             }
 
             return (delegate as any)(fileName, position, ...rest);

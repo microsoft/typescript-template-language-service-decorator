@@ -66,4 +66,9 @@ export default interface TemplateLanguageService {
         context: TemplateContext,
         position: ts.LineAndCharacter
     ): ts.ReferenceEntry[] | undefined;
+
+    getJsxClosingTagAtPosition?(
+        context: TemplateContext,
+        position: ts.LineAndCharacter
+    ): ts.JsxClosingTagInfo | undefined;
 }
