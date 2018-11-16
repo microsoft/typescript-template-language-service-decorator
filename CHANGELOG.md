@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.0 - November 16, 2018
+- Don't mutate the decorated language service. This was the intent of the original API design but in practice we were
+mutating the input language service. Now you must alway use the language service returned by `decorateWithTemplateLanguageService`.
+- Add wrapper for `getJsxClosingTagAtPosition`.
+
 ## 2.1.3 - November 15, 2018
 - Fix `getReferencesAtPosition` not being called when using TS 3.1+.
 

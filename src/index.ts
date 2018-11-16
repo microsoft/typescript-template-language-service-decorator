@@ -39,8 +39,11 @@ const nullLogger = new class NullLogger implements Logger {
  * @param languageService Base language service to augment.
  * @param templateService Language service for contents of template strings.
  * @param project Language service for contents of template strings.
- * @param templateSettings Determines how template strings are processed
- * @param additionalConfig Additional configuration for the service
+ * @param templateSettings Determines how template strings are processed.
+ * @param additionalConfig Additional configuration for the service.
+ *
+ * @return A copy of the language service with the template language applied. Does not mutate the
+ * input language service.
  */
 export function decorateWithTemplateLanguageService(
     typescript: typeof ts,
