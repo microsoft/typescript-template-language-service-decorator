@@ -3,9 +3,6 @@
 
 import * as ts from 'typescript/lib/tsserverlibrary';
 
-/**
- *
- */
 export default interface TemplateContext {
     readonly typescript: typeof ts;
 

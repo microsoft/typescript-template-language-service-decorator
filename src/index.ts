@@ -17,8 +17,14 @@ export {
     TemplateContext
 };
 
+/**
+ * Configuration of the decorated language service.
+ */
 export interface AdditionalConfiguration {
-    logger?: Logger;
+    /**
+     * Logger to use for printing debug messages to the TS Server log.
+     */
+    readonly logger?: Logger;
 }
 
 const nullLogger = new class NullLogger implements Logger {
@@ -29,6 +35,7 @@ const nullLogger = new class NullLogger implements Logger {
  * Augments a TypeScript language service with language support for the contents
  * of template strings.
  *
+ * @param typescript Instance of typescript to use.
  * @param languageService Base language service to augment.
  * @param templateService Language service for contents of template strings.
  * @param project Language service for contents of template strings.
