@@ -37,10 +37,17 @@ export default class TemplateLanguageServiceProxy {
     }
 
     public decorate(languageService: ts.LanguageService) {
-        this._wrappers.forEach(({ name, wrapper }) => {
-            languageService[name] = wrapper(languageService[name]!.bind(languageService));
+        const intercept: Partial<ts.LanguageService> = Object.create(null);
+
+        for (const { name, wrapper } of this._wrappers) {
+            intercept[name] = wrapper(languageService[name]!.bind(languageService));
+        }
+
+        return new Proxy(languageService, {
+            get: (target: any, property: string | symbol) => {
+                return (intercept as any)[property] || target[property];
+            },
         });
-        return languageService;
     }
 
     private tryAdaptGetSyntaxDiagnostics() {
