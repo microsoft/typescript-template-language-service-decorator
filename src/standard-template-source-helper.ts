@@ -204,17 +204,17 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
                 return undefined;
 
             case this.typescript.SyntaxKind.TemplateHead:
-                if (!templateStringSettings.enableForStringWithSubstitutions || !node.parent || !node.parent.parent) {
-                    return undefined;
+                if (templateStringSettings.enableForStringWithSubstitutions && node.parent && node.parent.parent) {
+                    return this.getValidTemplateNode(templateStringSettings, node.parent.parent);
                 }
-                return this.getValidTemplateNode(templateStringSettings, node.parent.parent);
+                return undefined;
 
             case this.typescript.SyntaxKind.TemplateMiddle:
             case this.typescript.SyntaxKind.TemplateTail:
-                if (!templateStringSettings.enableForStringWithSubstitutions || !node.parent || !node.parent.parent) {
-                    return undefined;
+                if (templateStringSettings.enableForStringWithSubstitutions && node.parent && node.parent.parent) {
+                    return this.getValidTemplateNode(templateStringSettings, node.parent.parent.parent);
                 }
-                return this.getValidTemplateNode(templateStringSettings, node.parent.parent.parent);
+                return undefined;
 
             default:
                 return undefined;
