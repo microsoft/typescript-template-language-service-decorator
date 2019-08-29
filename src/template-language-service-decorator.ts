@@ -41,7 +41,7 @@ export default class TemplateLanguageServiceProxy {
         const intercept: Partial<ts.LanguageService> = Object.create(null);
 
         for (const { name, wrapper } of this._wrappers) {
-            intercept[name] = wrapper(languageService[name]!.bind(languageService));
+            (intercept[name] as any) = wrapper(languageService[name]!.bind(languageService));
         }
 
         return new Proxy(languageService, {
@@ -198,7 +198,7 @@ export default class TemplateLanguageServiceProxy {
         this.typescript.getSupportedCodeFixes = () => {
             return [
                 ...delegate(),
-                ...this.templateStringService.getSupportedCodeFixes!(),
+                ...this.templateStringService.getSupportedCodeFixes!().map(x => '' + x),
             ];
         };
     }
