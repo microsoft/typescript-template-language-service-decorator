@@ -37,7 +37,7 @@ class EchoTemplateLanguageService implements TemplateLanguageService {
 
 The `TemplateLanguageService` operates on the contents of template nodes. `context.text` for example returns the text content of the template string, and the `position` passed to `getCompletionsAtPosition` is relative to the template string body.
 
-The `decorateWithTemplateLanguageService` method takes a existing TypeScript language service and decorates it with a `TemplateLanguageService`. Here's how you would use this mehod to create a simple TypeScript server plugin for the `EchoTemplateLanguageService`
+The `decorateWithTemplateLanguageService` method takes a existing TypeScript language service and decorates it with a `TemplateLanguageService`. Here's how you would use this method to create a simple TypeScript server plugin for the `EchoTemplateLanguageService`
 
 ```ts
 import * as ts from 'typescript/lib/tsserverlibrary';
