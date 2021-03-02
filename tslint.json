@@ -5,6 +5,7 @@
   ],
   "jsRules": {},
   "rules": {
+    "array-type": false,
     "indent": [
       true,
       "spaces"
