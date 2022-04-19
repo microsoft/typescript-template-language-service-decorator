@@ -63,7 +63,7 @@ export function isTagged(node: ts.TaggedTemplateExpression, tags: ReadonlyArray<
     const text = node.tag.getText();
     return tags.some(tag =>
         text === tag
-        || new RegExp(`$${escapeRegExp(tag)}\s*^`).test(text)
+        || new RegExp(`$${escapeRegExp(tag)}\\s*^`).test(text)
         || text.startsWith(tag + '.')
         || text.endsWith('.' + tag)
         || text.startsWith(tag + '(')

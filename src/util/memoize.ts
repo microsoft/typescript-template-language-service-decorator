@@ -18,6 +18,7 @@ export function memoize(_target: any, key: string, descriptor: any) {
     const memoizeKey = `$memoize$${key}`;
 
     descriptor[fnKey] = function(...args: any[]) {
+        // eslint-disable-next-line no-prototype-builtins
         if (!this.hasOwnProperty(memoizeKey)) {
             Object.defineProperty(this, memoizeKey, {
                 configurable: false,
