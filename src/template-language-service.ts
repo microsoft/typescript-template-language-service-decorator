@@ -53,6 +53,11 @@ export default interface TemplateLanguageService {
         position: ts.LineAndCharacter
     ): ts.DefinitionInfo[];
 
+    getDefinitionAndBoundSpan?(
+        context: TemplateContext,
+        position: ts.LineAndCharacter
+    ): ts.DefinitionInfoAndBoundSpan;
+
     getSignatureHelpItemsAtPosition?(
         context: TemplateContext,
         position: ts.LineAndCharacter
