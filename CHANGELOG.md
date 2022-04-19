@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.3.0 - April 19, 2022
+- Add wrapper for `getDefinitionAndBoundSpan`. Thanks @yesmeck!
+
 ## 2.2.0 - November 16, 2018
 - Don't mutate the decorated language service. This was the intent of the original API design but in practice we were
 mutating the input language service. Now you must alway use the language service returned by `decorateWithTemplateLanguageService`.
@@ -27,7 +30,7 @@ mutating the input language service. Now you must alway use the language service
 
 ## 1.7.0 - July 9, 2018
 - Added `rawText` that returns the raw contents of a template literal.
-- Memoize some properties. 
+- Memoize some properties.
 - Correctly mark some arrays as readonly in API.
 
 ## 1.6.1 - July 3, 2018
@@ -38,7 +41,7 @@ mutating the input language service. Now you must alway use the language service
 
 ## 1.5.0 - July 2, 2018
 - Added a `getSubstitutions` method on the settings. This method takes the raw template string
-and a list of all placeholder spans and returns the string with all placeholders removed. 
+and a list of all placeholder spans and returns the string with all placeholders removed.
 
 ## 1.4.0 - July 2, 2018
 - Allow `getCodeFixesAtPosition` to return `CodeFixAction`.
