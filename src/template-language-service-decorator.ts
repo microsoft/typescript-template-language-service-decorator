@@ -31,6 +31,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetCodeFixesAtPosition();
         this.tryAdaptGetSupportedCodeFixes();
         this.tryAdaptGetDefinitionAtPosition();
+        this.tryAdaptGetDefinitionAndBoundSpan();
         this.tryAdaptGetSignatureHelpItemsAtPosition();
         this.tryAdaptGetOutliningSpans();
         this.tryAdaptGetReferencesAtPosition();
@@ -217,6 +218,30 @@ export default class TemplateLanguageServiceProxy {
 
                 return definition
                     ? definition.map(def => this.translateDefinitionInfo(context, def))
+                    : undefined;
+            }
+
+            return (delegate as any)(fileName, position, ...rest);
+        });
+    }
+
+    private tryAdaptGetDefinitionAndBoundSpan() {
+        if (!this.templateStringService.getDefinitionAndBoundSpan) {
+            return;
+        }
+
+        this.wrap('getDefinitionAndBoundSpan', delegate => (fileName: string, position: number, ...rest: any[]) => {
+            const context = this.sourceHelper.getTemplate(fileName, position);
+            if (context) {
+                const definitionAndBoundSpan = this.templateStringService.getDefinitionAndBoundSpan!(
+                    context,
+                    this.sourceHelper.getRelativePosition(context, position));
+
+                return definitionAndBoundSpan.definitions
+                    ? {
+                        definitions: definitionAndBoundSpan.definitions.map(def => this.translateDefinitionInfo(context, def)),
+                        textSpan: this.translateTextSpan(context, definitionAndBoundSpan.textSpan)
+                    }
                     : undefined;
             }
 
@@ -428,7 +453,7 @@ export default class TemplateLanguageServiceProxy {
     ): ts.DefinitionInfo {
         return {
             ...definition,
-            fileName: context.fileName,
+            fileName: definition.fileName || context.fileName,
             textSpan: this.translateTextSpan(context, definition.textSpan),
         };
     }
