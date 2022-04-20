@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.3.1 - April 19, 2022
+- Fixing missing files in publish.
+
 ## 2.3.0 - April 19, 2022
 - Add wrapper for `getDefinitionAndBoundSpan`. Thanks @yesmeck!
 
