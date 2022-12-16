@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Node, LineAndCharacter } from 'typescript/lib/tsserverlibrary';
+import type * as ts from 'typescript/lib/tsserverlibrary';
+import { LineAndCharacter, Node } from 'typescript/lib/tsserverlibrary';
 
 export default interface ScriptSourceHelper {
     getAllNodes(

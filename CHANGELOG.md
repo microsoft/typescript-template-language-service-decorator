@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.3.2 - December 16, 2022
+- Update `getSupportedCodeFixes` to support TS 5.0+. See https://github.com/microsoft/TypeScript/pull/51769 for details.
+
 ## 2.3.1 - April 19, 2022
 - Fixing missing files in publish.
 

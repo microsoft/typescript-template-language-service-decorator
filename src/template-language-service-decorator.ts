@@ -3,7 +3,7 @@
 //
 // Original code forked from https://github.com/Quramy/ts-graphql-plugin
 
-import * as ts from 'typescript/lib/tsserverlibrary';
+import type * as ts from 'typescript/lib/tsserverlibrary';
 import Logger from './logger';
 import TemplateLanguageService from './template-language-service';
 import TemplateContext from './template-context';
@@ -195,13 +195,31 @@ export default class TemplateLanguageServiceProxy {
         if (!this.templateStringService.getSupportedCodeFixes) {
             return;
         }
-        const delegate = this.typescript.getSupportedCodeFixes.bind(this.typescript);
-        this.typescript.getSupportedCodeFixes = () => {
+
+        this.wrap('getSupportedCodeFixes', delegate => (_fileName: string) => {
             return [
                 ...delegate(),
                 ...this.templateStringService.getSupportedCodeFixes!().map(x => '' + x),
             ];
-        };
+        })
+
+        const [major] = this.typescript.version.split('.');
+        if (+major < 5) {
+            // Try also supporting old style override using property assignment
+            try {
+                this.typescript.version
+
+                const delegate = this.typescript.getSupportedCodeFixes.bind(this.typescript);
+                this.typescript.getSupportedCodeFixes = () => {
+                    return [
+                        ...delegate(),
+                        ...this.templateStringService.getSupportedCodeFixes!().map(x => '' + x),
+                    ];
+                };
+            } catch {
+                // Noop
+            }
+        }
     }
 
     private tryAdaptGetDefinitionAtPosition() {
