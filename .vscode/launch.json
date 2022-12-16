@@ -19,13 +19,11 @@
                 "TSS_DEBUG": "5999"
             },
             "args": [
-                "-u",
-                "tdd",
+                "${workspaceFolder}/e2e/tests/**/test.js",
+                "--ui=bdd",
                 "--timeout",
                 "999999",
-                "--colors",
-                "${workspaceFolder}/e2e/tests/**/test.js",
-                "-g", "aaa"
+                "--colors"
             ],
             "internalConsoleOptions": "openOnSessionStart"
         }
