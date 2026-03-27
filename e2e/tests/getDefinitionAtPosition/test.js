@@ -34,7 +34,10 @@ describe('GetDefinitionAtPosition', () => {
         const definitions = getFirstResponseOfType('definition', server).body;
         assert.strictEqual(definitions.length, 1);
         const [def] = definitions;
-        assert.deepEqual(def, { "file": mockFileName, "start": { "line": 1, "offset": 7 }, "end": { "line": 1, "offset": 10 } });
+        // TypeScript 5 adds contextStart/contextEnd fields; only check the fields the decorator is responsible for
+        assert.strictEqual(def.file, mockFileName);
+        assert.deepEqual(def.start, { "line": 1, "offset": 7 });
+        assert.deepEqual(def.end, { "line": 1, "offset": 10 });
     });
 });
 
