@@ -18,9 +18,13 @@ describe('OutliningSpans', () => {
         const spans = await getSpansInMockFile(
             'const q = test`a{bcd}e{f}g`'
         );
-        assert.strictEqual(spans.length, 2);
+        // TypeScript 5 adds an outlining span for the template literal itself
+        assert.strictEqual(spans.length, 3);
 
-        const [span1, span2] = spans;
+        const [tsSpan, span1, span2] = spans;
+        assertPosition(tsSpan.textSpan.start, 1, 15);
+        assertPosition(tsSpan.textSpan.end, 1, 28);
+
         assertPosition(span1.textSpan.start, 1, 17);
         assertPosition(span1.textSpan.end, 1, 22);
         assertPosition(span1.hintSpan.start, 1, 18);
@@ -39,9 +43,13 @@ describe('OutliningSpans', () => {
             '{f}g',
             '`'
         ].join('\n'));
-        assert.strictEqual(spans.length, 2);
+        // TypeScript 5 adds an outlining span for the template literal itself
+        assert.strictEqual(spans.length, 3);
 
-        const [span1, span2] = spans;
+        const [tsSpan, span1, span2] = spans;
+        assertPosition(tsSpan.textSpan.start, 1, 15);
+        assertPosition(tsSpan.textSpan.end, 4, 2);
+
         assertPosition(span1.textSpan.start, 2, 2);
         assertPosition(span1.textSpan.end, 2, 7);
         assertPosition(span1.hintSpan.start, 2, 3);
@@ -62,11 +70,15 @@ describe('OutliningSpans', () => {
             '`',
             '}'
         ].join('\n'));
-        assert.strictEqual(spans.length, 3);
+        // TypeScript 5 adds an outlining span for the template literal in addition to the block span
+        assert.strictEqual(spans.length, 4);
 
-        const [tsSpan, span1, span2] = spans;
+        const [tsSpan, tsTemplateSpan, span1, span2] = spans;
         assertPosition(tsSpan.textSpan.start, 1, 1);
         assertPosition(tsSpan.textSpan.end, 6, 2);
+
+        assertPosition(tsTemplateSpan.textSpan.start, 2, 15);
+        assertPosition(tsTemplateSpan.textSpan.end, 5, 2);
 
         assertPosition(span1.textSpan.start, 3, 2);
         assertPosition(span1.textSpan.end, 3, 7);
