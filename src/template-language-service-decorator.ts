@@ -36,6 +36,7 @@ export default class TemplateLanguageServiceProxy {
         this.tryAdaptGetOutliningSpans();
         this.tryAdaptGetReferencesAtPosition();
         this.tryAdaptGetJsxClosingTagAtPosition();
+        this.tryAdaptGetDocumentHighlights();
     }
 
     public decorate(languageService: ts.LanguageService) {
@@ -359,6 +360,36 @@ export default class TemplateLanguageServiceProxy {
             return (delegate as any)(fileName, position, ...rest);
         });
     }
+
+    private tryAdaptGetDocumentHighlights() {
+        if (!this.templateStringService.getDocumentHighlights) {
+            return;
+        }
+
+        this.wrap('getDocumentHighlights', delegate => (fileName: string, position: number, ...rest: any[]): ts.DocumentHighlights[] | undefined => {
+            const context = this.sourceHelper.getTemplate(fileName, position);
+            if (context) {
+                const highlights = this.templateStringService.getDocumentHighlights!(
+                    context,
+                    this.sourceHelper.getRelativePosition(context, position));
+
+                if (highlights) {
+                    return highlights.map(highlight => ({
+                        ...highlight,
+                        highlightSpans: highlight.highlightSpans.map(span => ({
+                            ...span,
+                            textSpan: this.translateTextSpan(context, span.textSpan),
+                            contextSpan: span.contextSpan && this.translateTextSpan(context, span.contextSpan),
+                        })),
+                    }));
+                }
+            }
+
+            return (delegate as any)(fileName, position, ...rest);
+        });
+    }
+
+    
 
     private wrap<K extends keyof ts.LanguageService>(name: K, wrapper: LanguageServiceMethodWrapper<K>) {
         this._wrappers.push({ name, wrapper });

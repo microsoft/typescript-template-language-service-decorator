@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import * as ts from "typescript/lib/tsserverlibrary";
+
 /**
  * Define which tagged templates to process and how to parse them.
  */
@@ -11,6 +13,11 @@ export default interface TemplateSettings {
      * The tag string may be matched at either the start or the end of the template's tag.
      */
     readonly tags: ReadonlyArray<string>;
+
+    /**
+     * Determine whether to provide language services for the Node
+     */
+    isValidTemplate?(node: ts.NoSubstitutionTemplateLiteral | ts.TaggedTemplateExpression | ts.TemplateExpression): boolean;
 
     /**
      * Should templates with substitutions be processed?

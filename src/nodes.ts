@@ -35,10 +35,8 @@ export function findAllNodes(
     function find(node: ts.Node) {
         if (cond(node)) {
             result.push(node);
-            return;
-        } else {
-            typescript.forEachChild(node, find);
         }
+        typescript.forEachChild(node, find);
     }
     find(sourceFile);
     return result;

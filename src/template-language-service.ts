@@ -77,4 +77,9 @@ export default interface TemplateLanguageService {
         context: TemplateContext,
         position: ts.LineAndCharacter
     ): ts.JsxClosingTagInfo | undefined;
+
+    getDocumentHighlights?(
+        context: TemplateContext,
+        position: ts.LineAndCharacter
+    ): ts.DocumentHighlights[] | undefined;
 }

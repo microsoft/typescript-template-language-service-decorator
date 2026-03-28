@@ -4,7 +4,7 @@
 import * as ts from 'typescript/lib/tsserverlibrary';
 import TemplateSourceHelper from './template-source-helper';
 import ScriptSourceHelper from './script-source-helper';
-import { isTaggedLiteral, isTagged, relative } from './nodes';
+import { isTagged, relative } from './nodes';
 import TemplateContext from './template-context';
 import TemplateSettings from './template-settings';
 import Logger from './logger';
@@ -165,7 +165,7 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
         fileName: string
     ): ReadonlyArray<TemplateContext> {
         const out: TemplateContext[] = [];
-        for (const node of this.helper.getAllNodes(fileName, n => this.getValidTemplateNode(this.templateStringSettings, n) !== undefined)) {
+        for (const node of this.helper.getAllNodes(fileName, n => this.getValidTemplateNode(this.templateStringSettings, n, true) !== undefined)) {
             const validNode = this.getValidTemplateNode(this.templateStringSettings, node);
             if (validNode) {
                 out.push(new StandardTemplateContext(this.typescript, fileName, validNode, this.helper, this.templateStringSettings));
@@ -185,34 +185,54 @@ export default class StandardTemplateSourceHelper implements TemplateSourceHelpe
 
     private getValidTemplateNode(
         templateStringSettings: TemplateSettings,
-        node: ts.Node | undefined
+        node: ts.Node | undefined,
+        isForEach = false,
     ): ts.TemplateLiteral | undefined {
         if (!node) {
             return undefined;
         }
+        const isValidTemplate = templateStringSettings.isValidTemplate || (() => false);
         switch (node.kind) {
+            case this.typescript.SyntaxKind.TemplateExpression:
+                if (isValidTemplate(node as ts.TemplateExpression)) {
+                    return node as ts.TemplateExpression;
+                }
+                return undefined;
+
             case this.typescript.SyntaxKind.TaggedTemplateExpression:
-                if (isTagged(node as ts.TaggedTemplateExpression, templateStringSettings.tags)) {
+                if (
+                    isValidTemplate(node as ts.TaggedTemplateExpression)
+                    || isTagged(node as ts.TaggedTemplateExpression, templateStringSettings.tags)
+                ) {
                     return (node as ts.TaggedTemplateExpression).template;
                 }
                 return undefined;
 
             case this.typescript.SyntaxKind.NoSubstitutionTemplateLiteral:
-                if (isTaggedLiteral(this.typescript, node as ts.NoSubstitutionTemplateLiteral, templateStringSettings.tags)) {
+                if (isValidTemplate(node as ts.NoSubstitutionTemplateLiteral)) {
                     return node as ts.NoSubstitutionTemplateLiteral;
                 }
-                return undefined;
 
+                if (!isForEach && node.parent) {
+                    return this.getValidTemplateNode(templateStringSettings, node.parent);
+                }
+
+                return undefined;
+        }
+
+        if (isForEach) return undefined;
+
+        switch(node.kind) {
             case this.typescript.SyntaxKind.TemplateHead:
                 if (templateStringSettings.enableForStringWithSubstitutions && node.parent && node.parent.parent) {
-                    return this.getValidTemplateNode(templateStringSettings, node.parent.parent);
+                    return this.getValidTemplateNode(templateStringSettings, node.parent) || this.getValidTemplateNode(templateStringSettings, node.parent.parent);
                 }
                 return undefined;
 
             case this.typescript.SyntaxKind.TemplateMiddle:
             case this.typescript.SyntaxKind.TemplateTail:
                 if (templateStringSettings.enableForStringWithSubstitutions && node.parent && node.parent.parent) {
-                    return this.getValidTemplateNode(templateStringSettings, node.parent.parent.parent);
+                    return this.getValidTemplateNode(templateStringSettings, node.parent.parent) || this.getValidTemplateNode(templateStringSettings, node.parent.parent.parent);
                 }
                 return undefined;
 
