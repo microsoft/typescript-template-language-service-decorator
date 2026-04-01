@@ -39,17 +39,11 @@ export default class TemplateLanguageServiceProxy {
     }
 
     public decorate(languageService: ts.LanguageService) {
-        const intercept: Partial<ts.LanguageService> = Object.create(null);
-
         for (const { name, wrapper } of this._wrappers) {
-            (intercept[name] as any) = wrapper(languageService[name]!.bind(languageService));
+            languageService[name] = wrapper(languageService[name]?.bind(languageService));
         }
 
-        return new Proxy(languageService, {
-            get: (target: any, property: string | symbol) => {
-                return (intercept as any)[property] || target[property];
-            },
-        });
+        return languageService
     }
 
     private tryAdaptGetSyntaxDiagnostics() {
